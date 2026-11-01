@@ -1,0 +1,244 @@
+<style>
+#librera-redesign .lr-stage{padding:24px 10px 34px;min-height:1120px;box-sizing:border-box;display:flex;justify-content:center;align-items:flex-start}
+#librera-redesign .lr-phone{--lr-bg:light-dark(#f7f5ee,#181e1b);--lr-surface:light-dark(#fffef9,#232c27);--lr-ink:light-dark(#243c31,#edf1e6);--lr-muted:light-dark(#66746b,#abb9ad);--lr-green:light-dark(#244c3a,#b5d0ba);--lr-on-green:light-dark(#fffef8,#173323);--lr-soft:light-dark(#e7eddf,#303f33);--lr-line:light-dark(#dfe3d8,#39473d);--lr-warning:light-dark(#865622,#e6bf83);--lr-shadow:light-dark(#1d34251a,#00000030);width:100%;max-width:414px;min-height:856px;background:var(--lr-bg);color:var(--lr-ink);border:1px solid var(--lr-line);border-radius:30px;box-shadow:0 18px 50px var(--lr-shadow);font-family:Arial,Helvetica,sans-serif;line-height:1.45;overflow:clip;position:relative;display:flex;flex-direction:column;box-sizing:border-box}
+#librera-redesign .lr-phone *{box-sizing:border-box}
+#librera-redesign .lr-phone button,#librera-redesign .lr-phone input,#librera-redesign .lr-phone select{font:inherit;color:inherit}
+#librera-redesign .lr-phone button{-webkit-tap-highlight-color:transparent}
+#librera-redesign .lr-phone button:disabled{cursor:default;opacity:.55}
+#librera-redesign .lr-phone button:focus-visible,#librera-redesign .lr-phone input:focus-visible,#librera-redesign .lr-phone select:focus-visible{outline:3px solid var(--lr-green);outline-offset:3px}
+#librera-redesign .lr-phone h1,#librera-redesign .lr-phone h2,#librera-redesign .lr-phone h3,#librera-redesign .lr-phone p{margin:0}
+#librera-redesign .lr-phone h1{font-size:30px;line-height:1.13;font-family:Georgia,serif;font-weight:400;letter-spacing:-.9px}
+#librera-redesign .lr-phone h2{font-size:21px;line-height:1.25;font-family:Georgia,serif;font-weight:400;letter-spacing:-.3px}
+#librera-redesign .lr-phone h3{font-size:16px;font-weight:600;line-height:1.3}
+#librera-redesign .lr-phone .lr-status{display:flex;justify-content:space-between;padding:16px 25px 5px;font-size:12px;font-weight:600;letter-spacing:.3px}
+#librera-redesign .lr-phone .lr-status-right{display:flex;align-items:center;gap:7px}
+#librera-redesign .lr-phone .lr-main{padding:15px 22px 22px;flex:1;min-width:0}
+#librera-redesign .lr-phone .lr-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:19px}
+#librera-redesign .lr-phone .lr-eyebrow{font-size:10px;letter-spacing:2px;font-weight:600;margin-bottom:5px;color:var(--lr-muted);text-transform:uppercase}
+#librera-redesign .lr-phone .lr-sub{font-size:13px;color:var(--lr-muted);margin-top:7px}
+#librera-redesign .lr-phone .lr-iconbutton{width:44px;height:44px;flex-shrink:0;border:1px solid var(--lr-line);border-radius:50%;background:var(--lr-surface);display:flex;align-items:center;justify-content:center;position:relative}
+#librera-redesign .lr-phone .lr-iconbutton[data-active=true]{background:var(--lr-soft);border-color:var(--lr-green)}
+#librera-redesign .lr-phone .lr-iconbutton .lr-count{position:absolute;right:-2px;top:-3px;border-radius:12px;padding:1px 5px;background:var(--lr-green);color:var(--lr-on-green);font-size:10px;min-width:16px}
+#librera-redesign .lr-phone i[data-lucide]{display:inline-block;width:18px;height:18px}
+#librera-redesign .lr-phone svg{width:19px;height:19px;stroke-width:1.65;flex-shrink:0}
+#librera-redesign .lr-phone .lr-source{display:flex;align-items:center;gap:7px;padding:0;border:0;background:transparent;font-size:12px;min-height:34px;color:var(--lr-muted);margin:1px 0 12px}
+#librera-redesign .lr-phone .lr-dot{width:6px;height:6px;background:var(--lr-green);border-radius:50%;display:inline-block}
+#librera-redesign .lr-phone .lr-search{background:var(--lr-surface);border:1px solid var(--lr-line);border-radius:13px;display:flex;align-items:center;gap:10px;padding:0 13px;min-height:48px;margin-bottom:13px}
+#librera-redesign .lr-phone .lr-search input{min-width:0;width:100%;border:0;background:transparent;outline-offset:1px;font-size:16px;padding:12px 0}
+#librera-redesign .lr-phone input::placeholder{color:var(--lr-muted)}
+#librera-redesign .lr-phone .lr-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px}
+#librera-redesign .lr-phone .lr-chip{border:1px solid var(--lr-line);border-radius:30px;background:transparent;padding:7px 12px;font-size:12px;min-height:36px}
+#librera-redesign .lr-phone .lr-chip[aria-pressed=true]{background:var(--lr-green);border-color:var(--lr-green);color:var(--lr-on-green)}
+#librera-redesign .lr-phone .lr-section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:3px 0 15px}
+#librera-redesign .lr-phone .lr-section-title span{font-size:12px;color:var(--lr-muted)}
+#librera-redesign .lr-phone .lr-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:23px 18px}
+#librera-redesign .lr-phone .lr-book{border:0;background:transparent;text-align:left;padding:0;min-width:0;display:block;width:100%}
+#librera-redesign .lr-phone .lr-cover{height:156px;border-radius:3px 9px 9px 3px;position:relative;overflow:hidden;background:var(--cover-bg);color:var(--cover-ink);padding:16px 15px 15px 18px;display:flex;flex-direction:column;box-shadow:2px 7px 12px var(--lr-shadow);isolation:isolate;text-align:left;max-width:100%}
+#librera-redesign .lr-phone .lr-cover:before{content:"";position:absolute;top:0;left:5px;bottom:0;width:2px;background:currentColor;opacity:.15}
+#librera-redesign .lr-phone .lr-cover:after{content:"";position:absolute;right:-28px;bottom:-43px;width:146px;height:146px;border:1px solid currentColor;border-radius:50%;box-shadow:0 0 0 20px color-mix(in srgb,currentColor 10%,transparent),0 0 0 40px color-mix(in srgb,currentColor 6%,transparent);opacity:.62;z-index:-1}
+#librera-redesign .lr-phone .lr-cover-author{font-size:9px;letter-spacing:1.3px;text-transform:uppercase;line-height:1.5;opacity:.9}
+#librera-redesign .lr-phone .lr-cover-title{font-family:Georgia,serif;font-size:24px;line-height:1.06;letter-spacing:-.5px;margin-top:14px;overflow-wrap:normal}
+#librera-redesign .lr-phone .lr-cover-mark{margin-top:auto;font-size:8px;letter-spacing:2px;text-transform:uppercase;opacity:.7}
+#librera-redesign .lr-phone .lr-book-name{display:block;font-size:14px;font-weight:600;line-height:1.3;margin:12px 0 3px}
+#librera-redesign .lr-phone .lr-book-author{display:block;font-size:13px;color:var(--lr-muted);line-height:1.35}
+#librera-redesign .lr-phone .lr-book-meta{display:block;font-size:12px;color:var(--lr-muted);margin-top:5px;letter-spacing:.3px}
+#librera-redesign .lr-phone .lr-nav{padding:9px 10px 16px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--lr-surface);border-top:1px solid var(--lr-line);gap:3px;margin-top:auto}
+#librera-redesign .lr-phone .lr-nav button{display:flex;align-items:center;flex-direction:column;gap:5px;border:0;padding:7px 1px 1px;background:transparent;border-radius:12px;min-height:55px;font-size:12px;color:var(--lr-muted)}
+#librera-redesign .lr-phone .lr-nav button[aria-current=page]{color:var(--lr-green);background:var(--lr-soft);font-weight:600}
+#librera-redesign .lr-phone .lr-nav svg{width:20px;height:20px}
+#librera-redesign .lr-phone .lr-primary{border:0;border-radius:13px;background:var(--lr-green);color:var(--lr-on-green);min-height:49px;padding:12px 15px;font-size:14px;display:flex;justify-content:center;align-items:center;gap:9px;width:100%;font-weight:600}
+#librera-redesign .lr-phone .lr-secondary{border:1px solid var(--lr-line);border-radius:13px;background:var(--lr-surface);min-height:44px;padding:10px 14px;font-size:13px;display:flex;justify-content:center;align-items:center;gap:8px}
+#librera-redesign .lr-phone .lr-textbutton{border:0;background:transparent;padding:8px 0;min-height:36px;font-size:12px;color:var(--lr-green);text-decoration:underline;text-underline-offset:3px}
+#librera-redesign .lr-phone .lr-backrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+#librera-redesign .lr-phone .lr-back{display:flex;align-items:center;gap:7px;min-height:44px;padding:0;border:0;background:transparent;font-size:13px}
+#librera-redesign .lr-phone .lr-detail-cover{width:150px;margin:7px auto 20px}
+#librera-redesign .lr-phone .lr-detail-cover .lr-cover{height:206px;padding-top:23px}
+#librera-redesign .lr-phone .lr-detail-cover .lr-cover-title{font-size:31px;margin-top:20px}
+#librera-redesign .lr-phone .lr-detail-title{text-align:center;font-size:28px;line-height:1.17;font-family:Georgia,serif;font-weight:400;letter-spacing:-.6px;margin-bottom:7px}
+#librera-redesign .lr-phone .lr-detail-author{text-align:center;color:var(--lr-muted);font-size:14px;margin-bottom:18px}
+#librera-redesign .lr-phone .lr-summary{font-size:13px;line-height:1.65;color:var(--lr-muted);margin:0 0 22px}
+#librera-redesign .lr-phone .lr-label{display:block;font-size:12px;font-weight:600;margin-bottom:9px}
+#librera-redesign .lr-phone .lr-formats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:18px}
+#librera-redesign .lr-phone .lr-format{border:1px solid var(--lr-line);border-radius:12px;background:var(--lr-surface);padding:11px 7px;min-width:0}
+#librera-redesign .lr-phone .lr-format[aria-pressed=true]{background:var(--lr-soft);border-color:var(--lr-green);box-shadow:inset 0 0 0 1px var(--lr-green)}
+#librera-redesign .lr-phone .lr-format strong{display:block;font-size:13px;font-weight:600}
+#librera-redesign .lr-phone .lr-format small{display:block;font-size:10px;color:var(--lr-muted);margin-top:3px}
+#librera-redesign .lr-phone .lr-location{font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--lr-muted);margin:11px 0 0}
+#librera-redesign .lr-phone .lr-location svg{width:13px;height:13px}
+#librera-redesign .lr-phone .lr-notice{background:var(--lr-soft);border-radius:13px;padding:13px 14px;font-size:12px;line-height:1.55;margin-bottom:18px}
+#librera-redesign .lr-phone .lr-notice strong{display:block;font-weight:600;margin-bottom:3px}
+#librera-redesign .lr-phone .lr-offline{border:1px solid var(--lr-line);background:var(--lr-surface)}
+#librera-redesign .lr-phone .lr-empty{text-align:center;padding:55px 10px;color:var(--lr-muted)}
+#librera-redesign .lr-phone .lr-empty h2{color:var(--lr-ink);margin:18px 0 10px}
+#librera-redesign .lr-phone .lr-empty p{font-size:13px;margin-bottom:20px}
+#librera-redesign .lr-phone .lr-empty svg{width:30px;height:30px}
+#librera-redesign .lr-phone .lr-row{display:grid;grid-template-columns:55px minmax(0,1fr) auto;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--lr-line)}
+#librera-redesign .lr-phone .lr-row .lr-cover{height:78px;padding:8px 5px 6px 9px;border-radius:2px 5px 5px 2px;box-shadow:none}
+#librera-redesign .lr-phone .lr-row .lr-cover-author{font-size:5px;letter-spacing:.2px}
+#librera-redesign .lr-phone .lr-row .lr-cover-title{font-size:12px;letter-spacing:-.3px;margin-top:7px}
+#librera-redesign .lr-phone .lr-row .lr-cover-mark{display:none}
+#librera-redesign .lr-phone .lr-row .lr-book-name{margin:0 0 4px}
+#librera-redesign .lr-phone .lr-row .lr-iconbutton{width:38px;height:44px;border:0;background:transparent}
+#librera-redesign .lr-phone .lr-row-main{min-width:0;text-align:left;background:transparent;border:0;padding:0}
+#librera-redesign .lr-phone .lr-track{height:4px;border-radius:8px;background:var(--lr-line);overflow:hidden;margin:10px 0 6px}
+#librera-redesign .lr-phone .lr-track span{display:block;height:100%;background:var(--lr-green)}
+#librera-redesign .lr-phone .lr-caption{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--lr-muted)}
+#librera-redesign .lr-phone .lr-setting{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--lr-line);padding:17px 0;min-height:63px;font-size:14px}
+#librera-redesign .lr-phone .lr-setting small{display:block;font-size:11px;color:var(--lr-muted);margin-top:4px}
+#librera-redesign .lr-phone .lr-setting .lr-setting-label{flex:1;min-width:0;overflow-wrap:anywhere}
+#librera-redesign .lr-phone .lr-setting .lr-selected-mark{font-size:12px;color:var(--lr-green)}
+#librera-redesign .lr-phone .lr-continue{background:var(--lr-soft);border-radius:17px;padding:20px;margin:6px 0 24px}
+#librera-redesign .lr-phone .lr-continue-top{display:grid;grid-template-columns:94px minmax(0,1fr);gap:19px;align-items:center;margin-bottom:18px}
+#librera-redesign .lr-phone .lr-continue .lr-cover{height:139px;padding:14px 12px}
+#librera-redesign .lr-phone .lr-continue .lr-cover-title{font-size:22px}
+#librera-redesign .lr-phone .lr-continue .lr-cover-author{font-size:7px}
+#librera-redesign .lr-phone .lr-continue p{font-size:12px;color:var(--lr-muted);margin:8px 0}
+#librera-redesign .lr-phone .lr-reader{background:var(--lr-surface);color:var(--lr-ink);margin:0 -22px -22px;padding:10px 26px 25px;min-height:645px}
+#librera-redesign .lr-phone .lr-reader-chapter{font-size:11px;letter-spacing:2px;color:var(--lr-muted);text-align:center;text-transform:uppercase;margin:10px 0 24px}
+#librera-redesign .lr-phone .lr-reader h2{text-align:center;font-size:27px;margin-bottom:24px}
+#librera-redesign .lr-phone .lr-reader-text{font-family:Georgia,serif;font-size:var(--lr-reader-size,19px);line-height:1.82}
+#librera-redesign .lr-phone .lr-reader-text p{margin-bottom:18px}
+#librera-redesign .lr-phone .lr-reader-tools{display:flex;align-items:center;justify-content:center;gap:9px;margin:24px 0 18px;flex-wrap:wrap}
+#librera-redesign .lr-phone .lr-reader-tools button{border:1px solid var(--lr-line);background:var(--lr-bg);border-radius:12px;padding:10px 14px;min-height:44px;min-width:44px;font-size:14px}
+#librera-redesign .lr-phone .lr-pages{text-align:center;color:var(--lr-muted);font-size:11px}
+#librera-redesign .lr-phone .lr-compact h1{font-family:Arial,Helvetica,sans-serif;font-size:27px;font-weight:600;letter-spacing:-.7px}
+#librera-redesign .lr-phone .lr-compact .lr-top{margin-bottom:10px}
+#librera-redesign .lr-phone .lr-compact .lr-source{margin-bottom:10px}
+#librera-redesign .lr-phone .lr-compact .lr-chips{margin-bottom:7px}
+#librera-redesign .lr-phone .lr-sort{display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px;font-size:11px;color:var(--lr-muted);gap:8px}
+#librera-redesign .lr-phone .lr-sort select{background:transparent;border:0;min-height:36px;font-size:11px;max-width:165px}
+#librera-redesign .lr-phone .lr-toast{font-size:12px;background:var(--lr-green);color:var(--lr-on-green);padding:12px 16px;text-align:center}
+#librera-redesign .lr-phone .lr-sr{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+#librera-redesign .lr-phone[data-density=compact] .lr-row{padding-top:8px;padding-bottom:8px}
+#librera-redesign .lr-phone[data-density=compact] .lr-grid{gap:16px 13px}
+@media(pointer:coarse){#librera-redesign .lr-phone button:not([hidden]),#librera-redesign .lr-phone select,#librera-redesign .lr-phone input{min-height:44px}#librera-redesign .lr-phone .lr-row .lr-iconbutton{min-width:44px}#librera-redesign .lr-phone .lr-reader-tools button{min-width:44px}}
+@media(max-width:370px){#librera-redesign .lr-stage{padding:10px 0 30px;min-height:1280px}#librera-redesign .lr-phone{border-radius:20px}#librera-redesign .lr-phone .lr-main{padding:14px 16px 20px}#librera-redesign .lr-phone .lr-grid{gap:20px 12px}#librera-redesign .lr-phone .lr-cover{height:147px;padding:13px 11px 13px 14px}#librera-redesign .lr-phone .lr-cover-title{font-size:22px}#librera-redesign .lr-phone .lr-chips{gap:5px}#librera-redesign .lr-phone .lr-chip{padding:7px 9px}#librera-redesign .lr-phone .lr-reader{margin:0 -16px -20px;padding:9px 22px 24px}#librera-redesign .lr-phone .lr-top{gap:8px}#librera-redesign .lr-phone .lr-row{gap:10px}}
+</style>
+<div id="librera-redesign" class="viz-carousel viz-dotted-background" aria-label="Варианты редизайна Librera" data-previous-label="Предыдущий вариант" data-next-label="Следующий вариант">
+  <section data-variant="Книжная полка" aria-label="Книжная полка">
+    <div class="lr-stage"><div id="lr-shelf" class="lr-phone" aria-label="Librera — книжная полка"></div></div>
+  </section>
+  <section data-variant="Компактный каталог" aria-label="Компактный каталог" hidden>
+    <div class="lr-stage"><div id="lr-compact" class="lr-phone" aria-label="Librera — компактный каталог"></div></div>
+  </section>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('librera-redesign');
+  const books = [
+    {id:'nights',title:'Белые ночи',author:'Фёдор Достоевский',coverAuthor:'ФЁДОР\nДОСТОЕВСКИЙ',genre:'Романы',year:'1848',size:'0,8',bg:'#294938',ink:'#e9e4c9',summary:'Четыре петербургские ночи, случайная встреча и история мечтателя, который впервые решается выйти из своего одиночества.',text:['Была чудная ночь, такая ночь, которая разве только и может быть тогда, когда мы молоды, любезный читатель.','Небо было такое звёздное, такое светлое небо, что, взглянув на него, невольно нужно было спросить себя: неужели же могут жить под таким небом разные сердитые и капризные люди?']},
+    {id:'captain',title:'Капитанская дочка',author:'Александр Пушкин',coverAuthor:'АЛЕКСАНДР\nПУШКИН',genre:'Романы',year:'1836',size:'1,2',bg:'#d9b78c',ink:'#443e30',summary:'Пётр Гринёв отправляется на службу в далёкую крепость. История взросления, любви и верности себе на фоне большого восстания.',text:['Отец мой Андрей Петрович Гринёв в молодости своей служил при графе Минихе и вышел в отставку премьер-майором в 17… году.','С тех пор жил он в своей Симбирской деревне, где и женился на девице Авдотье Васильевне Ю., дочери бедного тамошнего дворянина.']},
+    {id:'ward',title:'Палата № 6',author:'Антон Чехов',coverAuthor:'АНТОН\nЧЕХОВ',genre:'Рассказы',year:'1892',size:'0,4',bg:'#b3c4c1',ink:'#243c3c',summary:'Врач Андрей Ефимыч находит собеседника там, где меньше всего ожидал. Небольшая повесть о достоинстве, равнодушии и границах свободы.',text:['В больничном дворе стоит небольшой флигель, окружённый целым лесом репейника, крапивы и дикой конопли.','Крыша на нём ржавая, труба наполовину обвалилась, ступеньки у крыльца сгнили и поросли травой, а от штукатурки остались только следы.']},
+    {id:'oblomov',title:'Обломов',author:'Иван Гончаров',coverAuthor:'ИВАН\nГОНЧАРОВ',genre:'Романы',year:'1859',size:'2,1',bg:'#8d5545',ink:'#f7e4c8',summary:'Тихая жизнь Ильи Ильича сталкивается с деятельным миром Штольца и любовью Ольги. Роман о выборе между мечтой и действием.',text:['В Гороховой улице, в одном из больших домов, народонаселения которого стало бы на целый уездный город, лежал утром в постели, на своей квартире, Илья Ильич Обломов.','Это был человек лет тридцати двух-трёх от роду, среднего роста, приятной наружности, с тёмно-серыми глазами, но с отсутствием всякой определённой идеи.']},
+    {id:'onegin',title:'Евгений Онегин',author:'Александр Пушкин',coverAuthor:'АЛЕКСАНДР\nПУШКИН',genre:'Поэзия',year:'1833',size:'0,9',bg:'#444f69',ink:'#efdfbd',summary:'Роман в стихах о встречах, письмах и несовпадении чувств. Онегин, Татьяна и портрет целой эпохи.',text:['«Мой дядя самых честных правил,\nКогда не в шутку занемог,\nОн уважать себя заставил\nИ лучше выдумать не мог.','Его пример другим наука;\nНо, боже мой, какая скука\nС больным сидеть и день и ночь,\nНе отходя ни шагу прочь!»']},
+    {id:'souls',title:'Мёртвые души',author:'Николай Гоголь',coverAuthor:'НИКОЛАЙ\nГОГОЛЬ',genre:'Романы',year:'1842',size:'1,6',bg:'#b3ab81',ink:'#343a28',summary:'Павел Иванович Чичиков приезжает в губернский город с необычным деловым предложением. За чередой встреч возникает живой портрет России.',text:['В ворота гостиницы губернского города NN въехала довольно красивая рессорная небольшая бричка, в какой ездят холостяки.','В бричке сидел господин, не красавец, но и не дурной наружности, ни слишком толст, ни слишком тонок; нельзя сказать, чтобы стар, однако ж и не так чтобы слишком молод.']}
+  ];
+  const icon = name => `<i data-lucide="${name}" aria-hidden="true"></i>`;
+  const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const cover = (book) => `<div class="lr-cover" style="--cover-bg:${book.bg};--cover-ink:${book.ink}" aria-hidden="true"><span class="lr-cover-author">${escape(book.coverAuthor).replace(/\n/g,'<br>')}</span><span class="lr-cover-title">${escape(book.title)}</span><span class="lr-cover-mark">Библиотека</span></div>`;
+  const instances=[];
+  function createApp(id, compact) {
+    const el=document.getElementById(id);
+    const state={tab:'catalog',screen:'main',book:'nights',query:'',genre:'Все',format:'EPUB',local:['onegin'],localFormats:{onegin:'EPUB'},favorite:[],queue:{},source:'Автоматически',sort:'name',filter:'Все',toast:'',readerSize:19,readerTheme:'light',theme:'system',density:'comfortable',offline:false};
+    let toastTimer;
+    const downloadTimers=new Map();
+    function saved() { try { return window.openai?.widgetState?.privateContent?.[id]; } catch {return null;} }
+    function restore(data) {
+      if (!data || typeof data!=='object') return;
+      if (['catalog','reading','library','more'].includes(data.tab)) state.tab=data.tab;
+      if (Array.isArray(data.local)) state.local=[...new Set(['onegin',...data.local.filter(x=>books.some(b=>b.id===x))])];
+      if (data.localFormats && typeof data.localFormats==='object') state.local.forEach(id=>{if(['EPUB','FB2','PDF'].includes(data.localFormats[id]))state.localFormats[id]=data.localFormats[id];});
+      if (Array.isArray(data.favorite)) state.favorite=data.favorite.filter(x=>books.some(b=>b.id===x));
+      if (['system','light','dark'].includes(data.theme)) state.theme=data.theme;
+    }
+    restore(saved());
+    function persist(){
+      const privateContent={};instances.forEach(app=>privateContent[app.id]={tab:app.state.tab,local:app.state.local,localFormats:app.state.localFormats,favorite:app.state.favorite,theme:app.state.theme});
+      try {window.openai?.setWidgetState?.({modelContent:{prototype:'Librera catalog redesign',localBooks:state.local.length,favorites:state.favorite.length},privateContent})?.catch(()=>{});}catch{}
+    }
+    function notify(message){state.toast=message;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{state.toast='';render();},3500);}
+    function activeCount(){return Object.values(state.queue).filter(x=>x.status!=='done'&&x.status!=='cancelled').length;}
+    function top(title,eyebrow='LIBRERA'){return `<div class="lr-top"><div><div class="lr-eyebrow">${eyebrow}</div><h1>${title}</h1></div><button class="lr-iconbutton" data-action="downloads" aria-label="Загрузки">${icon('download')}${activeCount()?`<span class="lr-count">${activeCount()}</span>`:''}</button></div>`;}
+    function back(label='Каталог'){return `<div class="lr-backrow"><button class="lr-back" data-action="back">${icon('arrow-left')}${label}</button>${state.screen==='detail'?`<button class="lr-iconbutton" data-action="favorite" data-active="${state.favorite.includes(state.book)}" aria-pressed="${state.favorite.includes(state.book)}" aria-label="${state.favorite.includes(state.book)?'Убрать из избранного':'В избранное'}">${icon('bookmark')}</button>`:''}</div>`;}
+    function entry(book){return `<button class="lr-book" data-book="${book.id}" aria-label="${escape(book.title)}, ${escape(book.author)}">${cover(book)}<span class="lr-book-name">${escape(book.title)}</span><span class="lr-book-author">${escape(book.author)}</span><span class="lr-book-meta">${state.local.includes(book.id)?'НА УСТРОЙСТВЕ':'EPUB · FB2 · PDF'}</span></button>`;}
+    function row(book,local=false){return `<div class="lr-row">${cover(book)}<button class="lr-row-main" data-book="${book.id}"><span class="lr-book-name">${escape(book.title)}</span><span class="lr-book-author">${escape(book.author)}</span><span class="lr-book-meta">${local?'На устройстве · '+(state.localFormats[book.id]||'EPUB'):book.genre+' · '+book.year}</span></button><button class="lr-iconbutton" data-book="${book.id}" aria-label="${local?'Открыть':'Подробнее'}: ${escape(book.title)}">${icon(local?'book-open':'chevron-right')}</button></div>`;}
+    function catalog(){
+      let list=books.filter(b=>(state.genre==='Все'||b.genre===state.genre)&&(!state.query||(b.title+' '+b.author).toLocaleLowerCase('ru').includes(state.query.toLocaleLowerCase('ru'))));
+      if(!compact&&!state.query&&state.genre==='Все')list=list.slice(0,4);
+      if(compact&&state.sort==='name')list.sort((a,b)=>a.title.localeCompare(b.title,'ru'));
+      if(compact&&state.sort==='author')list.sort((a,b)=>a.author.localeCompare(b.author,'ru'));
+      return `${top('Каталог',compact?'ФЛИБУСТА / КНИГИ':'LIBRERA')}<button class="lr-source" data-action="source"><span class="lr-dot"></span>Флибуста · ${state.offline?'Нет соединения':'Доступна'}${icon('chevron-down')}</button><label class="lr-search">${icon('search')}<input type="search" data-search placeholder="Книга или автор" value="${escape(state.query)}" aria-label="Поиск по названию или автору"></label><div class="lr-chips">${['Все','Романы','Рассказы','Поэзия'].map(g=>`<button class="lr-chip" data-genre="${g}" aria-pressed="${state.genre===g}">${g}</button>`).join('')}</div>${state.offline?`<div class="lr-notice lr-offline"><strong>Вы не в сети</strong>Показываем сохранённый каталог. Ваши книги доступны без интернета.<br><button class="lr-textbutton" data-action="retry">Повторить подключение</button></div>`:''}${compact?`<div class="lr-sort"><span>${list.length} книг</span><select data-sort aria-label="Сортировка"><option value="name" ${state.sort==='name'?'selected':''}>По названию</option><option value="author" ${state.sort==='author'?'selected':''}>По автору</option></select></div>`:`<div class="lr-section-title"><h2>${state.query?'Результаты поиска':state.genre==='Все'?'На полку сегодня':state.genre}</h2><span>${list.length} ${list.length===1?'книга':list.length<5?'книги':'книг'}</span></div>`}${list.length?(compact?list.map(b=>row(b)).join(''):`<div class="lr-grid">${list.map(entry).join('')}</div>`):`<div class="lr-empty">${icon('search')}<h2>Книга не нашлась</h2><p>Попробуйте фамилию автора<br>или часть названия.</p><button class="lr-secondary" data-action="clear-search" style="margin:auto">Сбросить поиск</button></div>`}`;
+    }
+    function detail(){const b=books.find(x=>x.id===state.book),q=state.queue[b.id],local=state.local.includes(b.id);return `${back(state.tab==='library'?'Мои книги':'Каталог')}<div class="lr-detail-cover">${cover(b)}</div><h1 class="lr-detail-title">${b.title}</h1><p class="lr-detail-author">${b.author}</p><p class="lr-summary">${b.summary}</p>${!local?`<span class="lr-label">Формат книги</span><div class="lr-formats">${['EPUB','FB2','PDF'].map((f,i)=>`<button class="lr-format" data-format="${f}" aria-pressed="${state.format===f}"><strong>${f}</strong><small>${i===2?'3,2':b.size} МБ</small></button>`).join('')}</div>`:`<div class="lr-notice"><strong>Книга уже у вас</strong>Можно читать без подключения к интернету.</div>`}${q&&q.status!=='done'&&q.status!=='cancelled'?`<div class="lr-track" role="progressbar" aria-label="Загрузка книги" aria-valuenow="${q.progress}" aria-valuemin="0" aria-valuemax="100"><span style="width:${q.progress}%"></span></div><div class="lr-caption"><span>${q.status==='paused'?'Приостановлено':state.offline?'Ожидание сети':'Скачивание'}</span><span>${q.progress}%</span></div><button class="lr-primary" data-action="downloads" style="margin-top:16px">Открыть загрузки</button>`:`<button class="lr-primary" data-action="${local?'read':'download'}">${icon(local?'book-open':'download')}${local?'Читать книгу':'Скачать '+state.format}</button>`}<p class="lr-location">${icon('folder')}На устройстве · Книги / Librera</p>`;}
+    function library(){const list=books.filter(b=>state.filter==='Избранное'?state.favorite.includes(b.id):state.local.includes(b.id));return `${top('Мои книги')}<p class="lr-sub" style="margin:-7px 0 20px">Ваша библиотека всегда рядом</p><div class="lr-chips">${['Все','Избранное'].map(f=>`<button class="lr-chip" data-filter="${f}" aria-pressed="${state.filter===f}">${f}</button>`).join('')}</div>${list.length?list.map(b=>row(b,state.local.includes(b.id))).join(''):`<div class="lr-empty">${icon('bookmark')}<h2>Здесь будет любимое</h2><p>Добавьте книгу в избранное<br>из её карточки.</p><button class="lr-secondary" data-tab="catalog" style="margin:auto">Выбрать книгу</button></div>`}`;}
+    function reading(){const b=books.find(x=>x.id===state.local[state.local.length-1]);return `${top('Читаю')}<p class="lr-sub" style="margin:-7px 0 24px">Немного времени для хорошей истории</p><div class="lr-continue"><div class="lr-eyebrow" style="margin-bottom:15px">ПРОДОЛЖИТЬ ЧТЕНИЕ</div><div class="lr-continue-top">${cover(b)}<div><h2>${b.title}</h2><p>${b.author}</p><div class="lr-track"><span style="width:32%"></span></div><div class="lr-caption"><span>Глава первая</span><span>32%</span></div></div></div><button class="lr-primary" data-read="${b.id}">${icon('book-open')}Продолжить</button></div><div class="lr-section-title"><h2>В вашей библиотеке</h2><span>${state.local.length}</span></div>${books.filter(x=>state.local.includes(x.id)).slice(0,3).map(x=>row(x,true)).join('')}<button class="lr-textbutton" data-tab="catalog" style="margin-top:20px">Найти следующую книгу →</button>`;}
+    function downloads(){const entries=Object.entries(state.queue).filter(([,q])=>q.status!=='cancelled');return `${back('Назад')}<h1 style="margin-bottom:8px">Загрузки</h1><p class="lr-sub" style="margin-bottom:22px">Книги появятся в вашей библиотеке</p>${entries.length?entries.map(([id,q])=>{const b=books.find(x=>x.id===id);return `<div class="lr-row">${cover(b)}<div><span class="lr-book-name">${b.title}</span><span class="lr-book-author">${q.format} · ${q.status==='done'?'На устройстве':q.status==='paused'?'Приостановлено':state.offline?'Ожидание сети':q.progress+'%'}</span>${q.status!=='done'?`<div class="lr-track"><span style="width:${q.progress}%"></span></div><button class="lr-textbutton" data-cancel="${id}">Отменить</button>`:''}</div><button class="lr-iconbutton" ${q.status==='done'?`data-read="${id}"`:`data-pause="${id}"`} aria-label="${q.status==='done'?'Читать':q.status==='paused'?'Возобновить':'Приостановить'}: ${b.title}">${icon(q.status==='done'?'book-open':q.status==='paused'?'play':'pause')}</button></div>`;}).join(''):`<div class="lr-empty">${icon('download')}<h2>Пока ничего не скачивается</h2><p>Выберите книгу и удобный формат.<br>Здесь появится ход загрузки.</p><button class="lr-secondary" data-tab="catalog" style="margin:auto">Открыть каталог</button></div>`}<p class="lr-location" style="margin-top:25px">${icon('folder')}Книги / Librera</p>`;}
+    function source(){return `${back('Каталог')}<h1>Источник книг</h1><p class="lr-sub" style="margin-bottom:22px">Флибуста</p><div class="lr-notice"><strong>${state.offline?'Не удалось подключиться':'Соединение установлено'}</strong>${state.offline?'Можно попробовать другой адрес.':'Librera выбирает доступный адрес автоматически.'}</div>${['Автоматически','flibusta.is','proxy.flibusta.is','flibusta.site'].map(s=>`<button class="lr-setting" data-source="${s}">${icon(s==='Автоматически'?'shuffle':'globe')}<span class="lr-setting-label">${s}<small>${s==='Автоматически'?'Рекомендуется':'Использовать этот адрес'}</small></span>${state.source===s?`<span class="lr-selected-mark">${icon('check')}</span>`:''}</button>`).join('')}<button class="lr-secondary" data-action="retry" style="margin-top:24px;width:100%">${icon('refresh-cw')}Проверить соединение</button>`;}
+    function more(){return `${top('Ещё')}<p class="lr-sub" style="margin:-7px 0 22px">Всё для вашего способа читать</p><button class="lr-setting" data-action="source">${icon('globe')}<span class="lr-setting-label">Онлайн-каталоги<small>Флибуста · ${state.source}</small></span>${icon('chevron-right')}</button><button class="lr-setting" data-action="downloads">${icon('download')}<span class="lr-setting-label">Загрузки<small>Книги / Librera</small></span>${icon('chevron-right')}</button><button class="lr-setting" data-action="theme">${icon('sun-moon')}<span class="lr-setting-label">Оформление<small>${state.theme==='system'?'Как в системе':state.theme==='light'?'Светлое':'Тёмное'}</small></span>${icon('chevron-right')}</button><button class="lr-setting" data-action="offline">${icon(state.offline?'wifi-off':'wifi')}<span class="lr-setting-label">Режим офлайн<small>${state.offline?'Включён · только сохранённые книги':'Выключен'}</small></span>${icon('chevron-right')}</button><button class="lr-setting" data-action="tools">${icon('sliders-horizontal')}<span class="lr-setting-label">Настройки чтения<small>Шрифт, тема и размер текста</small></span>${icon('chevron-right')}</button>`;}
+    function reader(){const b=books.find(x=>x.id===state.book);return `${back('Мои книги')}<div class="lr-reader" style="--lr-reader-size:${state.readerSize}px;color-scheme:${state.readerTheme}"><p class="lr-reader-chapter">${b.author}</p><h2>${b.title}</h2><div class="lr-reader-text">${b.text.map(p=>`<p>${escape(p).replace(/\n/g,'<br>')}</p>`).join('')}</div><div class="lr-reader-tools"><button data-font="-1" aria-label="Уменьшить шрифт">A−</button><button data-action="reader-theme" aria-label="Сменить тему чтения">${icon('sun-moon')}</button><button data-font="1" aria-label="Увеличить шрифт">A+</button><button data-action="reader-bookmark" aria-label="Добавить закладку">${icon('bookmark')}</button></div><p class="lr-pages">Начало книги · ${state.readerSize} px</p></div>`;}
+    function render(options={}){
+      const current=el.querySelector('[data-search]'),focusSearch=options.search&&current===document.activeElement,position=focusSearch?current.selectionStart:null;
+      el.style.colorScheme=state.theme==='system'?'light dark':state.theme;
+      el.dataset.density=state.density;
+      let body=state.screen==='detail'?detail():state.screen==='downloads'?downloads():state.screen==='source'?source():state.screen==='reader'?reader():state.tab==='catalog'?catalog():state.tab==='library'?library():state.tab==='reading'?reading():more();
+      el.innerHTML=`<div class="lr-status"><span>9:41</span><span class="lr-status-right">${icon('signal')}${icon(state.offline?'wifi-off':'wifi')}${icon('battery-full')}</span></div><main class="lr-main ${compact?'lr-compact':''}">${body}</main>${state.toast?`<div class="lr-toast" role="status">${state.toast}</div>`:''}${state.screen==='reader'?'':`<nav class="lr-nav" aria-label="Разделы Librera">${[['reading','book-open','Читаю'],['library','library-big','Мои книги'],['catalog','compass','Каталог'],['more','menu','Ещё']].map(([tab,ic,label])=>`<button data-tab="${tab}" ${state.tab===tab?'aria-current="page"':''}>${icon(ic)}<span>${label}</span></button>`).join('')}</nav>`}<span class="lr-sr" aria-live="polite">${state.screen==='downloads'?activeCount()+' активных загрузок':''}</span>`;
+      el.querySelectorAll('button').forEach(button=>button.classList.add('cursor-interaction'));
+      if(globalThis.lucide)globalThis.lucide.createIcons({attrs:{width:18,height:18}});
+      if(focusSearch){const input=el.querySelector('[data-search]');input.focus();try{input.setSelectionRange(position,position);}catch{}}
+    }
+    function startDownload(){
+      const id=state.book;
+      if(state.local.includes(id))return;
+      const existing=state.queue[id];if(existing&&existing.status!=='cancelled')return;
+      clearInterval(downloadTimers.get(id));
+      state.queue[id]={progress:0,status:'running',format:state.format};
+      const job=state.queue[id];
+      const timer=setInterval(()=>{
+        const q=state.queue[id];if(!q||q!==job||q.status==='cancelled'){clearInterval(timer);return;}
+        if(q.status==='paused'||state.offline)return;
+        q.progress=Math.min(100,q.progress+10);
+        if(q.progress===100){q.status='done';state.local.push(id);state.localFormats[id]=q.format;clearInterval(timer);downloadTimers.delete(id);notify('Книга сохранена в «Мои книги»');persist();}
+        render();
+      },400);
+      downloadTimers.set(id,timer);
+    }
+    el.addEventListener('input',event=>{if(event.target.matches('[data-search]')){state.query=event.target.value;render({search:true});}});
+    el.addEventListener('change',event=>{if(event.target.matches('[data-sort]')){state.sort=event.target.value;render();}});
+    el.addEventListener('click',event=>{
+      const button=event.target.closest('button');if(!button||!el.contains(button))return;
+      const d=button.dataset;
+      if(d.tab){state.tab=d.tab;state.screen='main';state.toast='';}
+      if(d.book){state.book=d.book;state.screen='detail';state.format='EPUB';}
+      if(d.read){state.book=d.read;state.screen='reader';}
+      if(d.genre){state.genre=d.genre;}
+      if(d.filter){state.filter=d.filter;}
+      if(d.format){state.format=d.format;}
+      if(d.source){state.source=d.source;notify('Адрес выбран: '+d.source);}
+      if(d.pause){const q=state.queue[d.pause];q.status=q.status==='paused'?'running':'paused';}
+      if(d.cancel){state.queue[d.cancel].status='cancelled';clearInterval(downloadTimers.get(d.cancel));downloadTimers.delete(d.cancel);notify('Загрузка отменена');}
+      if(d.font){state.readerSize=Math.max(16,Math.min(25,state.readerSize+Number(d.font)));}
+      switch(d.action){
+        case 'downloads':state.screen='downloads';break;
+        case 'source':state.screen='source';break;
+        case 'back':state.screen='main';break;
+        case 'clear-search':state.query='';state.genre='Все';break;
+        case 'favorite':state.favorite=state.favorite.includes(state.book)?state.favorite.filter(x=>x!==state.book):[...state.favorite,state.book];notify(state.favorite.includes(state.book)?'Добавлено в избранное':'Убрано из избранного');break;
+        case 'download':startDownload();break;
+        case 'read':state.screen='reader';break;
+        case 'retry':state.offline=false;notify('Соединение восстановлено');break;
+        case 'offline':state.offline=!state.offline;break;
+        case 'theme':state.theme=state.theme==='system'?'light':state.theme==='light'?'dark':'system';break;
+        case 'reader-theme':state.readerTheme=state.readerTheme==='dark'?'light':'dark';break;
+        case 'reader-bookmark':notify('Закладка добавлена');break;
+        case 'tools':state.book=state.local[state.local.length-1];state.screen='reader';break;
+      }
+      render();persist();
+    });
+    const app={id,state,render,restore};instances.push(app);render();
+    if(globalThis.Tweak){const tweak=new globalThis.Tweak({container:el,onChange:render});tweak.addSelect(state,'theme',{label:'Тема',options:[{label:'Системная',value:'system'},{label:'Светлая',value:'light'},{label:'Тёмная',value:'dark'}]});tweak.addSelect(state,'density',{label:'Плотность',options:[{label:'Свободная',value:'comfortable'},{label:'Компактная',value:'compact'}]});tweak.addToggle(state,'offline',{label:'Нет соединения'});}
+    return app;
+  }
+  createApp('lr-shelf',false);createApp('lr-compact',true);
+  window.addEventListener('openai:set_globals',event=>{const saved=event.detail?.globals?.widgetState?.privateContent;if(saved)instances.forEach(app=>{app.restore(saved[app.id]);app.render();});});
+})();
+</script>
