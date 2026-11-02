@@ -728,4 +728,6 @@
    <string name="catalog_queued">Ve frontě</string>
    <string name="catalog_no_selection">Vyberte knihu pro zobrazení podrobností</string>
    <string name="catalog_tab_title">Katalog</string>
+   <string name="catalog_saved_results">Uložené výsledky</string>
+   <string name="catalog_filter_scope">Filtry se vztahují na načtené knihy</string>
 </resources>

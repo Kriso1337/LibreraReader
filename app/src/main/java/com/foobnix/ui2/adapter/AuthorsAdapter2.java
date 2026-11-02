@@ -14,6 +14,7 @@ import com.foobnix.model.AppState;
 import com.foobnix.pdf.info.R;
 import com.foobnix.pdf.info.TintUtil;
 import com.foobnix.ui2.AppRecycleAdapter;
+import com.foobnix.ui2.LibraryDesign;
 import com.foobnix.ui2.adapter.AuthorsAdapter2.AuthorViewHolder;
 import com.foobnix.ui2.fast.FastScroller;
 
@@ -45,6 +46,7 @@ public class AuthorsAdapter2 extends AppRecycleAdapter<String, AuthorViewHolder>
 
             bindItemClickAndLongClickListeners(holder.parent, string);
             FileMetaAdapter.showShadow(holder.parent, AppState.get().isBorderAndShadow);
+            if (holder.parent.getContext() instanceof com.foobnix.ui2.MainTabs2) holder.text.setTextColor(LibraryDesign.ink());
         }
 
     }

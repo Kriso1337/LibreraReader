@@ -36,59 +36,36 @@ public abstract class BaseExtractor {
 
     public abstract String getBookOverview(String path);
 
-    public static Bitmap getBookCoverWithTitleBitmap(String title, String author) {
-
-        if (TxtUtils.isEmpty(author)) {
-            author = "";
-        }
-        if (TxtUtils.isEmpty(title)) {
-            title = "";
-        }
-
-        title = TxtUtils.ellipsize(title, 20);
-        author = TxtUtils.ellipsize(author, 40);
-
-        int w = Dips.dpToPx(AppState.get().coverBigSize - 8);
-        int h = (int) (w * (IMG.WIDTH_DK));
-
-        TextPaint pNormal = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-        pNormal.setColor(Color.WHITE);
-        pNormal.setTextSize(h / 11);
-
-        TextPaint pBold = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-        pBold.setColor(Color.WHITE);
-        pBold.setTextSize(h / 14);
-        pBold.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-
-        Bitmap bitmap = Bitmap.createBitmap(w, h, AppsConfig.CURRENT_BITMAP_ARGB);
-        Canvas c = new Canvas(bitmap);
-        c.save();
-        c.drawColor(TintUtil.randomColor((title + author).hashCode()));
-
-        int margin = Dips.dpToPx(10);
-        StaticLayout mTextLayout = staticLayout(title, pBold, c.getWidth() - margin * 2);
-        c.translate(margin, Dips.dpToPx(20));
-        mTextLayout.draw(c);
-
-        StaticLayout text2 = staticLayout(author, pNormal, c.getWidth() - margin * 2);
-        c.translate(0, mTextLayout.getHeight() + (margin));
-        text2.draw(c);
+    /** Plain jackets match the bookshelf; real embedded covers never enter this method. */
+    public static Bitmap getBookCoverWithTitleBitmap(String firstLine, String bookTitle) {
+        String author = TxtUtils.isEmpty(bookTitle) ? "" : (firstLine == null ? "" : firstLine);
+        String title = TxtUtils.isEmpty(bookTitle) ? (firstLine == null ? "" : firstLine) : bookTitle;
+        author=TxtUtils.ellipsize(author,128);title=TxtUtils.ellipsize(title.split(":",2)[0],256);
+        int w = Math.max(120, Dips.dpToPx(Math.max(96,AppState.get().coverBigSize)));
+        int h = Math.round(w * 1.4f);
+        Bitmap bitmap=Bitmap.createBitmap(w,h,AppsConfig.CURRENT_BITMAP_ARGB);
+        Canvas canvas=new Canvas(bitmap);
+        int[] colors={Color.rgb(41,73,56),Color.rgb(78,93,88),Color.rgb(112,77,57),Color.rgb(68,79,105)};
+        canvas.drawColor(colors[(title.hashCode() & Integer.MAX_VALUE)%colors.length]);
+        int margin=Math.round(w*.10f), content=w-margin*2;
+        TextPaint small=new TextPaint(TextPaint.ANTI_ALIAS_FLAG);small.setColor(Color.rgb(233,231,214));small.setTextSize(w*.075f);
+        TextPaint display=new TextPaint(TextPaint.ANTI_ALIAS_FLAG);display.setColor(Color.rgb(249,244,223));
+        display.setTypeface(Typeface.create("serif",Typeface.NORMAL));display.setTextSize(w*.14f);
+        float longest=0;for(String word:title.split("\\s+"))longest=Math.max(longest,display.measureText(word));
+        float safeTextWidth=content-Math.max(2,w*.02f);
+        if(longest>safeTextWidth)display.setTextSize(Math.max(w*.09f,display.getTextSize()*safeTextWidth/longest));
+        StaticLayout authorLayout=jacketText(author,small,content,2);
+        canvas.save();canvas.translate(margin,Math.round(h*.10f));authorLayout.draw(canvas);
+        canvas.translate(0,authorLayout.getHeight()+Math.round(w*.12f));
+        jacketText(title,display,content,6).draw(canvas);canvas.restore();
         return bitmap;
-
     }
 
-    /**
-     * A centred block of text at the given width, built the way the deprecated
-     * {@link StaticLayout} constructor used to: centre alignment, spacing multiplier 1 with no
-     * extra, and no included font padding - the builder defaults that last one to true, so it is
-     * set back to false here to keep the cover text where it was.
-     */
-    private static StaticLayout staticLayout(CharSequence text, TextPaint paint, int width) {
-        return StaticLayout.Builder.obtain(text, 0, text.length(), paint, Math.max(0, width))
-                                   .setAlignment(Alignment.ALIGN_CENTER)
-                                   .setLineSpacing(0.0f, 1.0f)
-                                   .setIncludePad(false)
-                                   .build();
+    private static StaticLayout jacketText(String text,TextPaint paint,int width,int lines) {
+        return StaticLayout.Builder.obtain(text,0,text.length(),paint,width).setAlignment(Alignment.ALIGN_NORMAL)
+                .setIncludePad(false).setMaxLines(lines).setEllipsize(android.text.TextUtils.TruncateAt.END)
+                .setBreakStrategy(android.text.Layout.BREAK_STRATEGY_SIMPLE)
+                .setHyphenationFrequency(android.text.Layout.HYPHENATION_FREQUENCY_NONE).build();
     }
 
     public static byte[] getBookCoverWithTitle(String title) {
@@ -109,9 +86,6 @@ public abstract class BaseExtractor {
     public static Bitmap getBookCoverWithTitle(String title, String author, boolean withLogo) {
         try {
             Bitmap bookCoverWithTitleBitmap = getBookCoverWithTitleBitmap(title, author);
-            if (withLogo) {
-                MagicHelper.applyBookEffectWithLogo(bookCoverWithTitleBitmap);
-            }
             return bookCoverWithTitleBitmap;
         } catch (OutOfMemoryError e) {
             LOG.e(e);

@@ -728,4 +728,6 @@
    <string name="catalog_queued">Sorban áll</string>
    <string name="catalog_no_selection">Válasszon könyvet a részletekhez</string>
    <string name="catalog_tab_title">Katalógus</string>
+   <string name="catalog_saved_results">Mentett találatok</string>
+   <string name="catalog_filter_scope">A szűrők a betöltött könyvekre vonatkoznak</string>
 </resources>

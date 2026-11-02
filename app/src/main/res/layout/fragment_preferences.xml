@@ -9,10 +9,10 @@
     android:background="?android:attr/colorBackground"
     android:orientation="vertical">
 
-    <LinearLayout
+    <com.foobnix.ui2.LibraryHeader
         android:id="@+id/panelRecent"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/wh_button"
+        android:layout_height="wrap_content"
         android:layout_margin="@dimen/panel_padding"
         android:background="@drawable/bg_search_second"
         android:gravity="center_vertical"
@@ -51,7 +51,7 @@
             android:visibility="visible" />
 
 
-    </LinearLayout>
+    </com.foobnix.ui2.LibraryHeader>
 
     <ScrollView
         android:id="@+id/scroll"

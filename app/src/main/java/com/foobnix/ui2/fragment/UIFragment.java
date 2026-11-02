@@ -54,6 +54,7 @@ import com.foobnix.pdf.search.activity.msg.OpenDirMessage;
 import com.foobnix.pdf.search.activity.msg.UpdateAllFragments;
 import com.foobnix.sys.TempHolder;
 import com.foobnix.ui2.MainTabs2;
+import com.foobnix.ui2.LibraryDesign;
 import com.foobnix.ui2.adapter.AuthorsAdapter2;
 import com.foobnix.ui2.adapter.DefaultListeners;
 import com.foobnix.ui2.adapter.FileMetaAdapter;
@@ -118,7 +119,9 @@ public abstract class UIFragment<T> extends Fragment {
             TxtUtils.setInkTextView(view);
         }
 
+        if (!(this instanceof CatalogFragment)) LibraryDesign.prepareTab(view);
         floatChromeOverPage(view);
+        if (!(this instanceof CatalogFragment)) LibraryDesign.paintTab(view);
 
         if (recyclerView instanceof FastScrollRecyclerView) {
             swipeRefreshLayout = getActivity().findViewById(R.id.swipeRefreshLayout);
@@ -398,6 +401,7 @@ public abstract class UIFragment<T> extends Fragment {
         headerSquared = false;
         floatingHeader.requestLayout();
         paintFloatingNotice();
+        if (!(this instanceof CatalogFragment) && getView() != null) LibraryDesign.paintTab(getView());
     }
 
     private void paintFloatingNotice() {
@@ -422,6 +426,15 @@ public abstract class UIFragment<T> extends Fragment {
         ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) floatingHeader.getLayoutParams();
         int carried = 0;
         int cleared = 0;
+        WindowInsetsCompat safeInsets = ViewCompat.getRootWindowInsets(attached);
+        if (safeInsets != null) {
+            androidx.core.graphics.Insets cutout = safeInsets.getInsets(WindowInsetsCompat.Type.displayCutout());
+            int left = LibraryDesign.dp(floatingHeader, 16) + cutout.left;
+            int right = LibraryDesign.dp(floatingHeader, 16) + cutout.right;
+            if (floatingHeader.getPaddingLeft() != left || floatingHeader.getPaddingRight() != right) {
+                floatingHeader.setPadding(left, floatingHeader.getPaddingTop(), right, floatingHeader.getPaddingBottom());
+            }
+        }
         if (SlidingTabLayout.isFloating()) {
             WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(attached);
             carried = DocumentController.keptClearOf(getActivity(), insets).top;
@@ -565,6 +578,9 @@ public abstract class UIFragment<T> extends Fragment {
         }
 
         isSecondTime = true;
+        if (!(this instanceof CatalogFragment) && getView() != null) {
+            getView().post(() -> { if (getView() != null) LibraryDesign.paintTab(getView()); });
+        }
 
     }
 
@@ -657,6 +673,7 @@ public abstract class UIFragment<T> extends Fragment {
                         }
                         try {
                             populateDataInUI(result);
+                            if (!(UIFragment.this instanceof CatalogFragment) && getView() != null) LibraryDesign.paintTab(getView());
                         } catch (Exception e) {
                             LOG.e(e);
                         }
@@ -678,12 +695,14 @@ public abstract class UIFragment<T> extends Fragment {
      * it squeeze every cover to a sliver.
      */
     private int gridColumns() {
-        int widthDP = Dips.pxToDp(recyclerView.getWidth());
+        int widthDP = Dips.pxToDp(recyclerView.getWidth() - recyclerView.getPaddingLeft() - recyclerView.getPaddingRight());
         if (widthDP <= 0) {
             // Not laid out yet: the window's width, which the list will soon fill.
             widthDP = recyclerView.getResources().getConfiguration().screenWidthDp;
         }
-        return Math.max(gridMinColumns, widthDP / Math.max(1, gridColumnDP));
+        float scale = recyclerView.getResources().getConfiguration().fontScale;
+        int readable = Math.round(Math.max(156, gridColumnDP + 12) * (1 + (Math.max(1, Math.min(2, scale)) - 1) * .5f));
+        return Math.max(gridMinColumns, widthDP / readable);
     }
 
     /** Recounts the columns when the window is resized, without waiting for the list to be rebuilt. */

@@ -2,18 +2,30 @@ package com.foobnix.catalog;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.SystemClock;
+import android.os.ParcelFileDescriptor;
+import android.provider.Settings;
+import android.view.View;
+import android.view.MotionEvent;
+import android.view.InputDevice;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import androidx.test.runner.lifecycle.Stage;
 import androidx.work.WorkManager;
 
 import com.foobnix.dao2.FileMeta;
 import com.foobnix.model.AppSP;
 import com.foobnix.model.AppState;
 import com.foobnix.pdf.info.ExtUtils;
+import com.foobnix.pdf.info.R;
 import com.foobnix.ui2.AppDB;
 import com.foobnix.ui2.MainTabs2;
 
@@ -69,14 +81,10 @@ public class CatalogDownloadDeviceTest {
             if(stored!=null && !stored.localPath.isEmpty() && !localPaths.contains(stored.localPath)) localPaths.add(stored.localPath);
         }
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        restoreReadingPreferences();
         if(reader!=null) InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> reader.finish());
         if(activity!=null) InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> activity.finish());
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        if(readingPreferencesChanged) InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            AppState.get().isRememberMode=rememberedMode;
-            AppState.get().isPrefFormatMode=preferredMode;
-            AppSP.get().readingMode=readingMode;
-        });
         // These paths were created by the opt-in test and never point at pre-existing books.
         for(String path:localPaths) {
             AppDB.get().deleteBy(path);
@@ -88,6 +96,14 @@ public class CatalogDownloadDeviceTest {
         File[] files=fixtures.listFiles();
         if(files!=null) for(File f:files)f.delete();
         fixtures.delete();
+    }
+
+    private void restoreReadingPreferences() {
+        if(readingPreferencesChanged) InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            AppState.get().isRememberMode=rememberedMode;
+            AppState.get().isPrefFormatMode=preferredMode;
+            AppSP.get().readingMode=readingMode;
+        });
     }
 
     @Test public void androidSaxAcceptsFb2AndUtf16() throws Exception {
@@ -237,7 +253,190 @@ public class CatalogDownloadDeviceTest {
                 SystemClock.sleep(250);
             }
             assertTrue("Reader decoded book pages",pages.get()>0);
+            if (Boolean.parseBoolean(InstrumentationRegistry.getArguments().getString("catalogScreens", "false"))) {
+                captureReaderAcceptance(instrumentation, monitor);
+            }
         } finally { instrumentation.removeMonitor(monitor); }
+    }
+
+    /** Opt-in runtime screenshots of the decoded test-owned book, not a mock reader. */
+    private void captureReaderAcceptance(Instrumentation instrumentation, Instrumentation.ActivityMonitor monitor) throws Exception {
+        final boolean oldEdit = AppState.get().isEditMode;
+        final int oldOrientation = AppState.get().orientation;
+        final int oldAuto = Settings.System.getInt(context.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 1);
+        final int oldRotation = Settings.System.getInt(context.getContentResolver(), Settings.System.USER_ROTATION,
+                reader.getWindowManager().getDefaultDisplay().getRotation());
+        // Android 16 ignores fixed orientations on large screens. This extra opt-in is
+        // for the landscape-native LibreraTablet AVD; phone runs change only the Activity.
+        final boolean rotateDisplay = Boolean.parseBoolean(InstrumentationRegistry.getArguments()
+                .getString("catalogTabletRotation", "false"));
+        try {
+            for (boolean portrait : new boolean[]{false, true}) {
+                final int requested = portrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                instrumentation.runOnMainSync(() -> {
+                    // Only values supported by the existing orientation menu are valid.
+                    AppState.get().orientation = requested;
+                    reader.setRequestedOrientation(requested);
+                });
+                if (rotateDisplay) readerShell(instrumentation, "cmd window user-rotation lock " + (portrait ? 1 : 0));
+                awaitRotatedReader(instrumentation, monitor, portrait);
+                instrumentation.runOnMainSync(() -> {
+                    AppState.get().isEditMode = true;
+                    reader.getController().getWrapperControlls().hideShow();
+                });
+                settleReader(instrumentation);
+                final String[] orientation = new String[1];
+                instrumentation.runOnMainSync(() -> {
+                    View root = reader.findViewById(R.id.parentParent);
+                    orientation[0] = root.getWidth() > root.getHeight() ? "landscape" : "portrait";
+                    View top = reader.findViewById(R.id.menuLayout), bottom = reader.findViewById(R.id.bottomBar);
+                    assertTrue("Reader toolbars remain separated", bounds(top).bottom <= bounds(bottom).top);
+                    for (int id : new int[]{R.id.onLibrary, R.id.close, R.id.onBookmarks, R.id.onDocDontext,
+                            R.id.onShowSearch, R.id.textToSpeach, R.id.bookMenu, R.id.prefTop}) {
+                        View action = reader.findViewById(id);
+                        assertNotNull("Existing reader action remains", action);
+                        assertTrue("Reader action has a listener", action.hasOnClickListeners());
+                        assertReaderTarget(action);
+                    }
+                });
+                saveReaderScreenshot(instrumentation, "reader-" + orientation[0]);
+                instrumentation.runOnMainSync(() -> {
+                    View preferences = reader.findViewById(R.id.prefTop);
+                    preferences.requestRectangleOnScreen(new Rect(0, 0, preferences.getWidth(), preferences.getHeight()), true);
+                });
+                settleReader(instrumentation);
+                instrumentation.runOnMainSync(() -> {
+                    View preferences = reader.findViewById(R.id.prefTop);
+                    assertFullyVisible(preferences); preferences.performClick();
+                });
+                settleReader(instrumentation);
+                instrumentation.runOnMainSync(() -> {
+                    View anchor = reader.findViewById(R.id.anchor);
+                    assertEquals("Real preferences callback opens the panel", View.VISIBLE, anchor.getVisibility());
+                    View close = anchor.findViewById(R.id.closePopup);
+                    assertNotNull(close); assertReaderTarget(close); assertFullyVisible(close);
+                    assertNotNull("Real preferences content, not the exception fallback", anchor.findViewById(R.id.screenOrientation));
+                    assertNotNull("Font settings remain available", anchor.findViewById(R.id.moreFontSettings));
+                    assertTrue("Settings must render above the top toolbar", anchor.getZ() > reader.findViewById(R.id.menuLayout).getZ());
+                    assertTrue("Settings must render above the bottom toolbar", anchor.getZ() > reader.findViewById(R.id.bottomBar).getZ());
+                    Rect panel = bounds(anchor), frame = bounds(reader.findViewById(R.id.parentParent));
+                    assertTrue("Settings fit horizontally", panel.left >= frame.left && panel.right <= frame.right);
+                    assertTrue("Settings fit vertically", panel.top >= frame.top && panel.bottom <= frame.bottom);
+                });
+                saveReaderScreenshot(instrumentation, "reader-settings-" + orientation[0]);
+                final Rect[] closeBounds = new Rect[1];
+                instrumentation.runOnMainSync(() -> closeBounds[0] = bounds(reader.findViewById(R.id.closePopup)));
+                tapReaderScreen(instrumentation, closeBounds[0].exactCenterX(), closeBounds[0].exactCenterY());
+                settleReader(instrumentation);
+                instrumentation.runOnMainSync(() -> assertEquals("Close dismisses settings", View.GONE,
+                        reader.findViewById(R.id.anchor).getVisibility()));
+            }
+        } finally {
+            // Restore before onPause persists the profile. Close the fixture reader before
+            // restoring rotation so a final orientation event cannot reopen the test book.
+            restoreReadingPreferences();
+            instrumentation.runOnMainSync(() -> {
+                AppState.get().isEditMode = oldEdit; AppState.get().orientation = oldOrientation;
+                if (reader != null) reader.finish();
+            });
+            instrumentation.waitForIdleSync();
+            if (rotateDisplay) {
+                readerShell(instrumentation, "cmd window user-rotation lock " + oldRotation);
+                if (oldAuto == 1) readerShell(instrumentation, "cmd window user-rotation free");
+            }
+        }
+    }
+
+    private void awaitRotatedReader(Instrumentation instrumentation, Instrumentation.ActivityMonitor monitor, boolean portrait) throws Exception {
+        long deadline = SystemClock.elapsedRealtime() + 30_000;
+        int stable = 0;
+        final String[] diagnostic = {"not started"};
+        while (SystemClock.elapsedRealtime() < deadline) {
+            final boolean[] ready = {false};
+            instrumentation.runOnMainSync(() -> {
+                Activity newest = monitor.getLastActivity();
+                if (newest instanceof VerticalViewActivity && !newest.isFinishing() && !newest.isDestroyed()) reader = (VerticalViewActivity) newest;
+                for (Activity resumed : ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED)) {
+                    if (resumed instanceof VerticalViewActivity) reader = (VerticalViewActivity) resumed;
+                }
+                if (reader.isFinishing() || reader.isDestroyed()) {
+                    diagnostic[0] = "activity=" + System.identityHashCode(reader) + ", finishing=" + reader.isFinishing()
+                            + ", destroyed=" + reader.isDestroyed(); return;
+                }
+                // Text books ask to reflow after rotation; accept that existing UI path for
+                // this disposable book instead of bypassing the reader's decoding lifecycle.
+                try {
+                    java.lang.reflect.Field field = VerticalViewActivity.class.getDeclaredField("rotationDialog");
+                    field.setAccessible(true);
+                    Object dialog = field.get(reader);
+                    if (dialog instanceof AlertDialog && ((AlertDialog) dialog).isShowing()) {
+                        diagnostic[0] = "accepting reader reflow confirmation";
+                        ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).performClick(); return;
+                    }
+                } catch (ReflectiveOperationException error) { throw new AssertionError(error); }
+                View root = reader.findViewById(R.id.parentParent);
+                int pages = reader.getController().getDocumentModel().getPageCount();
+                diagnostic[0] = "expected=" + (portrait ? "portrait" : "landscape") + ", window="
+                        + (root == null ? "null" : root.getWidth() + "x" + root.getHeight())
+                        + ", pages=" + pages + ", displayRotation=" + reader.getWindowManager().getDefaultDisplay().getRotation()
+                        + ", appOrientation=" + AppState.get().orientation + ", requested=" + reader.getRequestedOrientation()
+                        + ", activity=" + System.identityHashCode(reader);
+                ready[0] = root != null && root.getWidth() > 0
+                        && (portrait ? root.getHeight() > root.getWidth() : root.getWidth() > root.getHeight())
+                        && pages > 0;
+            });
+            // The reader records its initial orientation one second after decoding.
+            if (ready[0]) { if (++stable >= 8) return; } else stable = 0;
+            SystemClock.sleep(200);
+        }
+        fail("Rotated reader did not finish reflowing the fixture: " + diagnostic[0]);
+    }
+
+    private static void readerShell(Instrumentation instrumentation, String command) throws IOException {
+        try (ParcelFileDescriptor descriptor = instrumentation.getUiAutomation().executeShellCommand(command);
+             java.io.InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(descriptor)) {
+            byte[] buffer = new byte[1024]; while (stream.read(buffer) != -1) { }
+        }
+    }
+
+    /** Screen-coordinate input catches occlusion that performClick/getGlobalVisibleRect cannot. */
+    private static void tapReaderScreen(Instrumentation instrumentation, float x, float y) {
+        long downTime = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0);
+        MotionEvent up = MotionEvent.obtain(downTime, downTime + 60, MotionEvent.ACTION_UP, x, y, 0);
+        down.setSource(InputDevice.SOURCE_TOUCHSCREEN); up.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        try { instrumentation.sendPointerSync(down); instrumentation.sendPointerSync(up); }
+        finally { down.recycle(); up.recycle(); }
+    }
+
+    private static void settleReader(Instrumentation instrumentation) {
+        instrumentation.waitForIdleSync(); SystemClock.sleep(150); instrumentation.waitForIdleSync();
+    }
+
+    private void saveReaderScreenshot(Instrumentation instrumentation, String name) throws IOException {
+        Bitmap bitmap = instrumentation.getUiAutomation().takeScreenshot(); assertNotNull(bitmap);
+        File directory = new File(context.getExternalFilesDir(null), "tests-reader");
+        assertTrue(directory.isDirectory() || directory.mkdirs());
+        try (FileOutputStream output = new FileOutputStream(new File(directory, name + ".png"))) {
+            assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output));
+        } finally { bitmap.recycle(); }
+    }
+
+    private static Rect bounds(View view) {
+        int[] xy = new int[2]; view.getLocationOnScreen(xy);
+        return new Rect(xy[0], xy[1], xy[0] + view.getWidth(), xy[1] + view.getHeight());
+    }
+
+    private static void assertReaderTarget(View action) {
+        int minimum = Math.round(48 * action.getResources().getDisplayMetrics().density);
+        assertTrue("Reader touch width " + action.getId(), action.getWidth() >= minimum);
+        assertTrue("Reader touch height " + action.getId(), action.getHeight() >= minimum);
+    }
+
+    private static void assertFullyVisible(View view) {
+        Rect visible = new Rect(); assertTrue("Action is on screen", view.getGlobalVisibleRect(visible));
+        assertTrue("Action width is reachable", visible.width() >= view.getWidth() - 1);
+        assertTrue("Action height is reachable", visible.height() >= view.getHeight() - 1);
     }
 
     private CatalogDownloads.Task fixtureTask(String status) {

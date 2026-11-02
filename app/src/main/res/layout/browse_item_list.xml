@@ -165,7 +165,7 @@
                     android:textSize="@dimen/text_subtitle" />
             </LinearLayout>
 
-            <LinearLayout
+            <com.foobnix.ui2.LibraryHeader
                 android:layout_marginRight="8dip"
                 android:id="@+id/infoLayout"
                 android:layout_width="match_parent"
@@ -257,7 +257,7 @@
                     android:src="@drawable/glyphicons_498_more_vertical"
                     android:tint="@color/tint_gray"
                     android:visibility="visible" />
-            </LinearLayout>
+            </com.foobnix.ui2.LibraryHeader>
 
             <!-- The line runs the width of the row with the same air either side of it. The
                  column it sits in is held off the cover by 3dip on its left and nothing on its

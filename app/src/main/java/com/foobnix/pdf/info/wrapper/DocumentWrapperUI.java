@@ -1428,6 +1428,7 @@ public class DocumentWrapperUI {
         hideShowPrevNext();
         dc.initAnchor(anchor);
         TxtUtils.updateAllLinks(parentParent);
+        com.foobnix.pdf.info.view.ReaderChrome.apply(a);
     }
 
     public void updateSeekBarColorAndSize() {
@@ -1485,6 +1486,7 @@ public class DocumentWrapperUI {
         batteryIcon.getLayoutParams().height = batteryIcon.getLayoutParams().width = iconSize;
 
         // lirbiLogo.getLayoutParams().height = panelSize;
+        com.foobnix.pdf.info.view.ReaderChrome.apply(a);
 
     }
 
@@ -1926,6 +1928,7 @@ public class DocumentWrapperUI {
 
         bottomBar.setVisibility(View.VISIBLE);
         seekLine.setVisibility(AppState.get().isShowBottomSeekBar ? View.VISIBLE : View.GONE);
+        com.foobnix.pdf.info.view.ReaderChrome.apply(a);
         //adFrame.setVisibility(View.VISIBLE);
         // adFrame.setClickable(true);
         // adFrame.setTag(null);

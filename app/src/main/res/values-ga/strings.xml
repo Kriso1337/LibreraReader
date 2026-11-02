@@ -728,4 +728,6 @@
    <string name="catalog_queued">Sa scuaine</string>
    <string name="catalog_no_selection">Roghnaigh leabhar chun sonraí a fheiceáil</string>
    <string name="catalog_tab_title">Catalóg</string>
+   <string name="catalog_saved_results">Torthaí sábháilte</string>
+   <string name="catalog_filter_scope">Baineann na scagairí leis na leabhair atá luchtaithe</string>
 </resources>

@@ -728,4 +728,6 @@
    <string name="catalog_queued">Jonossa</string>
    <string name="catalog_no_selection">Valitse kirja nähdäksesi tiedot</string>
    <string name="catalog_tab_title">Luettelo</string>
+   <string name="catalog_saved_results">Tallennetut tulokset</string>
+   <string name="catalog_filter_scope">Suodattimet koskevat ladattua kirjaluetteloa</string>
 </resources>

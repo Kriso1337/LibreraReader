@@ -728,4 +728,6 @@
    <string name="catalog_queued">Kwenye foleni</string>
    <string name="catalog_no_selection">Chagua kitabu ili kuona maelezo</string>
    <string name="catalog_tab_title">Katalogi</string>
+   <string name="catalog_saved_results">Matokeo yaliyohifadhiwa</string>
+   <string name="catalog_filter_scope">Vichujio vinatumika kwa vitabu vilivyopakiwa</string>
 </resources>

@@ -17,10 +17,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 
 import javax.net.ssl.SSLException;
 
@@ -39,12 +45,19 @@ public final class CatalogRepository {
     private static final int CACHE_VERSION = 1;
     private static final long CACHE_LIMIT = 16L * 1024 * 1024;
     private static final int CACHE_FILES = 48;
+    private static final int MEMORY_PAGES = 8;
+    private static final long MEMORY_LIMIT = 4L * 1024 * 1024;
+    private static final LinkedHashMap<String, ParsedPage> PARSED = new LinkedHashMap<>(16, .75f, true);
+    private static long parsedBytes;
+    public static final long FRESH_FOR_MS = TimeUnit.MINUTES.toMillis(15);
+    private static final int LANDING_HOPS = 3;
     private final SharedPreferences preferences;
     private final File cache;
     private final CatalogParser parser = new CatalogParser();
     private final OkHttpClient client;
     private final AtomicInteger cancellation = new AtomicInteger();
     private volatile String successfulMirror = MIRRORS[0];
+    private BooleanSupplier networkAllowed = () -> true;
 
     public CatalogRepository(Context context) {
         this(new File(context.getApplicationContext().getFilesDir(), "catalog-pages-v1"),
@@ -57,7 +70,10 @@ public final class CatalogRepository {
     }
 
     CatalogRepository(File cacheDirectory, SharedPreferences settings, OkHttpClient httpClient) {
-        cache = cacheDirectory;
+        File canonical;
+        try { canonical = cacheDirectory.getCanonicalFile(); }
+        catch (IOException unavailable) { canonical = cacheDirectory.getAbsoluteFile(); }
+        cache = canonical;
         preferences = settings;
         client = httpClient;
     }
@@ -91,6 +107,7 @@ public final class CatalogRepository {
         }
         requested = CatalogUrls.onMirror(requested, first);
         if (offline) return cachedPage(requested);
+        checkNetworkAllowed();
 
         List<String> attempts = new ArrayList<>();
         attempts.add(first);
@@ -104,7 +121,7 @@ public final class CatalogRepository {
                 CatalogPage page = parser.parse(document.bytes, document.url);
                 page.fetchedAt = System.currentTimeMillis();
                 successfulMirror = HttpUrl.parse(document.url).newBuilder().encodedPath("/").query(null).build().toString();
-                save(attempt, document, page.fetchedAt);
+                save(attempt, document, page.fetchedAt, page);
                 return page;
             } catch (SSLException error) {
                 // Certificate failures are not treated as ordinary unavailable mirrors.
@@ -125,13 +142,110 @@ public final class CatalogRepository {
 
     public CatalogPage search(String query, boolean offline) throws IOException {
         if (query == null || query.trim().isEmpty()) return load(null, offline);
-        CatalogPage root = load(null, offline);
+        CatalogPage root = loadFresh(null, offline);
+        return load(CatalogUrls.searchUrl(searchTemplate(root, offline), query), offline);
+    }
+
+    /** Disk-only lookup for an immediate first frame; the caller decides when to refresh. */
+    public CatalogPage cached(String url) throws IOException { return load(url, true); }
+
+    public CatalogPage cachedSearch(String query) throws IOException {
+        if (query == null || query.trim().isEmpty()) return cached(null);
+        return cached(CatalogUrls.searchUrl(searchTemplate(cached(null), true), query));
+    }
+
+    public static boolean isFresh(CatalogPage page) {
+        return page != null && isFresh(page.fetchedAt);
+    }
+
+    private static boolean isFresh(long fetchedAt) {
+        long age = System.currentTimeMillis() - fetchedAt;
+        return fetchedAt > 0 && age >= 0 && age < FRESH_FOR_MS;
+    }
+
+    /** Prefer a recent saved page without adding a network round trip. */
+    public CatalogPage loadFresh(String url, boolean offline) throws IOException {
+        try {
+            CatalogPage saved = cached(url);
+            if (offline || isFresh(saved)) return saved;
+        } catch (IOException miss) { if (offline) throw miss; }
+        return load(url, false);
+    }
+
+    /** The remembered home is a feed of books, not the root's list of directories. */
+    public CatalogPage cachedLanding() throws IOException {
+        String address = preferences.getString("landing_url", "");
+        if (!address.isEmpty()) {
+            try {
+                CatalogPage saved = cached(address);
+                if (hasBooks(saved)) return saved;
+            } catch (IOException miss) { /* A bounded cache can evict an old home page. */ }
+        }
+        return discoverLanding(true, true);
+    }
+
+    /** Follow at most three advertised navigation links. No book or cover is downloaded. */
+    public CatalogPage loadLanding(boolean offline) throws IOException {
+        if (offline) return cachedLanding();
+        return discoverLanding(false, false);
+    }
+
+    private CatalogPage discoverLanding(boolean offline, boolean preferFresh) throws IOException {
+        // Re-discover the new-books path when refreshing: some catalogs publish a
+        // new dated URL rather than updating the URL remembered on the previous day.
+        CatalogPage page = preferFresh ? loadFresh(null, offline) : load(null, offline);
+        Set<String> visited = new HashSet<>();
+        visited.add(CatalogUrls.cacheKey(page.url));
+        for (int hops = 0; !hasBooks(page) && hops < LANDING_HOPS; hops++) {
+            String next = landingNavigation(page);
+            if (next.isEmpty() || !visited.add(CatalogUrls.cacheKey(next))) break;
+            page = preferFresh ? loadFresh(next, offline) : load(next, offline);
+        }
+        if (hasBooks(page)) preferences.edit().putString("landing_url", page.url).apply();
+        return page;
+    }
+
+    static boolean hasBooks(CatalogPage page) {
+        for (CatalogEntry entry : page.entries) if (!entry.acquisitions.isEmpty()) return true;
+        return false;
+    }
+
+    private static String landingNavigation(CatalogPage page) {
+        String fallback = "";
+        for (CatalogEntry entry : page.entries) {
+            if (entry.navigationUrl.isEmpty() || !entry.acquisitions.isEmpty()) continue;
+            if (fallback.isEmpty()) fallback = entry.navigationUrl;
+            String title = entry.title.toLowerCase(Locale.ROOT);
+            String path = HttpUrl.parse(entry.navigationUrl).encodedPath().toLowerCase(Locale.ROOT);
+            if (path.contains("/new") || title.startsWith("нов") || title.startsWith("new")
+                    || title.startsWith("recent")) return entry.navigationUrl;
+        }
+        return fallback;
+    }
+
+    /** Bounded speculative work: root, <=3 navigation feeds, and one next page. */
+    public CatalogPage warmLanding() throws IOException {
+        CatalogPage saved;
+        try { saved = cachedLanding(); }
+        catch (IOException miss) { saved = null; }
+        CatalogPage home = isFresh(saved) && hasBooks(saved) ? saved : discoverLanding(false, true);
+        if (hasBooks(home) && !home.nextUrl.isEmpty()
+                && !CatalogUrls.cacheKey(home.url).equals(CatalogUrls.cacheKey(home.nextUrl))) {
+            loadFresh(home.nextUrl, false);
+        }
+        return home;
+    }
+
+    private String searchTemplate(CatalogPage root, boolean offline) throws IOException {
         String template = root.searchTemplate;
         if (template.isEmpty() && !root.searchDescriptionUrl.isEmpty()) {
-            Document description;
-            if (offline || root.fromCache) description = read(root.searchDescriptionUrl);
-            else {
-                description = fetch(root.searchDescriptionUrl);
+            Document description = null;
+            try { description = read(root.searchDescriptionUrl); }
+            catch (IOException miss) { if (offline) throw miss; }
+            if (description == null || (!offline && !isFresh(description.fetchedAt))) {
+                String selected = getMirror();
+                description = fetch(CatalogUrls.onMirror(root.searchDescriptionUrl,
+                        selected.isEmpty() ? successfulMirror : selected));
                 // Validate before caching; the HTML error page is never stored.
                 parser.parseSearchDescription(description.bytes, description.url);
                 save(root.searchDescriptionUrl, description, System.currentTimeMillis());
@@ -139,7 +253,16 @@ public final class CatalogRepository {
             template = parser.parseSearchDescription(description.bytes, description.url);
         }
         if (template.isEmpty()) throw new IOException("Catalog does not advertise search");
-        return load(CatalogUrls.searchUrl(template, query), offline);
+        return template;
+    }
+
+    /** Worker guard is checked before every HTTP request, including redirects/retries. */
+    void setNetworkAllowed(BooleanSupplier allowed) { networkAllowed = allowed; }
+
+    private void checkNetworkAllowed() throws IOException {
+        if (Thread.currentThread().isInterrupted() || !networkAllowed.getAsBoolean()) {
+            throw new IOException("Catalog request cancelled");
+        }
     }
 
     /** Cancels outstanding calls when the owning screen is disposed. */
@@ -149,6 +272,7 @@ public final class CatalogRepository {
         int generation = cancellation.get();
         String current = CatalogUrls.validate(address);
         for (int redirect = 0; redirect <= 4; redirect++) {
+            checkNetworkAllowed();
             if (generation != cancellation.get()) throw new IOException("Catalog request cancelled");
             if (!CatalogUrls.isCatalogUrl(current)) throw new IOException("Unexpected catalog redirect");
             Request request = new Request.Builder().url(current)
@@ -192,11 +316,23 @@ public final class CatalogRepository {
     }
 
     private CatalogPage cachedPage(String address) throws IOException {
-        Document cached = read(address);
-        CatalogPage page = parser.parse(cached.bytes, cached.url);
-        page.fromCache = true;
-        page.fetchedAt = cached.fetchedAt;
-        return page;
+        synchronized (CACHE_LOCK) {
+            File file = cacheFile(address);
+            ParsedPage memory = PARSED.get(file.getAbsolutePath());
+            if (memory != null && file.isFile() && memory.modified == file.lastModified()
+                    && memory.length == file.length()) {
+                CatalogPage page = copyPage(memory.page);
+                page.fromCache = true;
+                return page;
+            }
+            forgetParsed(file);
+            Document cached = read(address);
+            CatalogPage page = parser.parse(cached.bytes, cached.url);
+            page.fromCache = true;
+            page.fetchedAt = cached.fetchedAt;
+            rememberParsed(file, page);
+            return page;
+        }
     }
 
     private Document read(String address) throws IOException {
@@ -219,6 +355,10 @@ public final class CatalogRepository {
     }
 
     private void save(String address, Document document, long fetchedAt) {
+        save(address, document, fetchedAt, null);
+    }
+
+    private void save(String address, Document document, long fetchedAt, CatalogPage parsed) {
         synchronized (CACHE_LOCK) {
             File temporary = null;
             try {
@@ -233,6 +373,11 @@ public final class CatalogRepository {
                 }
                 File destination = cacheFile(address);
                 if (!temporary.renameTo(destination)) return;
+                // Disk replacement and parsed publication share a lock across all
+                // repositories. A slower warmup cannot publish stale objects after
+                // another repository has already replaced this file.
+                forgetParsed(destination);
+                if (parsed != null) rememberParsed(destination, parsed);
                 prune();
             } catch (IOException ignored) {
                 // A full disk must not turn a successful online lookup into failure.
@@ -249,7 +394,7 @@ public final class CatalogRepository {
         long total = 0;
         for (int index = 0; index < files.length; index++) {
             total += files[index].length();
-            if (index >= CACHE_FILES || total > CACHE_LIMIT) files[index].delete();
+            if ((index >= CACHE_FILES || total > CACHE_LIMIT) && files[index].delete()) forgetParsed(files[index]);
         }
     }
 
@@ -257,10 +402,75 @@ public final class CatalogRepository {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(
                     CatalogUrls.cacheKey(address).getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder();
-            for (byte value : digest) hex.append(String.format(Locale.ROOT, "%02x", value & 255));
-            return new File(cache, hex + ".feed");
+            char[] hex = new char[digest.length * 2];
+            char[] alphabet = "0123456789abcdef".toCharArray();
+            for (int i = 0; i < digest.length; i++) {
+                hex[i * 2] = alphabet[(digest[i] & 255) >>> 4];
+                hex[i * 2 + 1] = alphabet[digest[i] & 15];
+            }
+            return new File(cache, new String(hex) + ".feed");
         } catch (NoSuchAlgorithmException impossible) { throw new IOException(impossible); }
+    }
+
+    private static void forgetParsed(File file) {
+        ParsedPage removed = PARSED.remove(file.getAbsolutePath());
+        if (removed != null) parsedBytes -= removed.bytes;
+    }
+
+    /** Called only under CACHE_LOCK. Strings are immutable; all mutable models are copied. */
+    private static void rememberParsed(File file, CatalogPage page) {
+        forgetParsed(file);
+        long bytes = estimatedBytes(page);
+        if (bytes > MEMORY_LIMIT || !file.isFile()) return;
+        PARSED.put(file.getAbsolutePath(), new ParsedPage(copyPage(page), file.lastModified(), file.length(), bytes));
+        parsedBytes += bytes;
+        Iterator<Map.Entry<String, ParsedPage>> oldest = PARSED.entrySet().iterator();
+        while ((PARSED.size() > MEMORY_PAGES || parsedBytes > MEMORY_LIMIT) && oldest.hasNext()) {
+            parsedBytes -= oldest.next().getValue().bytes;
+            oldest.remove();
+        }
+    }
+
+    private static long estimatedBytes(CatalogPage page) {
+        long bytes = 192 + textBytes(page.title) + textBytes(page.url) + textBytes(page.nextUrl)
+                + textBytes(page.searchTemplate) + textBytes(page.searchDescriptionUrl);
+        for (CatalogEntry entry : page.entries) {
+            bytes += 128 + textBytes(entry.id) + textBytes(entry.title) + textBytes(entry.author)
+                    + textBytes(entry.summary) + textBytes(entry.coverUrl) + textBytes(entry.navigationUrl);
+            for (CatalogAcquisition acquisition : entry.acquisitions) {
+                bytes += 64 + textBytes(acquisition.url) + textBytes(acquisition.mimeType) + textBytes(acquisition.format);
+            }
+        }
+        return bytes;
+    }
+
+    private static long textBytes(String value) { return value == null ? 0 : 40L + value.length() * 2L; }
+
+    private static CatalogPage copyPage(CatalogPage original) {
+        CatalogPage result = new CatalogPage();
+        result.title = original.title; result.url = original.url; result.nextUrl = original.nextUrl;
+        result.searchTemplate = original.searchTemplate; result.searchDescriptionUrl = original.searchDescriptionUrl;
+        result.fetchedAt = original.fetchedAt; result.fromCache = original.fromCache;
+        for (CatalogEntry source : original.entries) {
+            CatalogEntry entry = new CatalogEntry();
+            entry.id = source.id; entry.title = source.title; entry.author = source.author;
+            entry.summary = source.summary; entry.coverUrl = source.coverUrl; entry.navigationUrl = source.navigationUrl;
+            for (CatalogAcquisition sourceFormat : source.acquisitions) {
+                CatalogAcquisition format = new CatalogAcquisition();
+                format.url = sourceFormat.url; format.mimeType = sourceFormat.mimeType; format.format = sourceFormat.format;
+                entry.acquisitions.add(format);
+            }
+            result.entries.add(entry);
+        }
+        return result;
+    }
+
+    private static final class ParsedPage {
+        final CatalogPage page;
+        final long modified, length, bytes;
+        ParsedPage(CatalogPage page, long modified, long length, long bytes) {
+            this.page = page; this.modified = modified; this.length = length; this.bytes = bytes;
+        }
     }
 
     private static final class Document {

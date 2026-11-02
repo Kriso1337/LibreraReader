@@ -257,7 +257,7 @@ public class IMG {
                 .onlyRetrieveFromCache(false)
            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
            //.override(imageSize)
-              .signature(new ObjectKey(url.hashCode()))
+              .signature(new ObjectKey("bookshelf-jackets-v4:" + url.hashCode()))
            .listener(new RequestListener<>() {
                @Override public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target,
                                                      boolean isFirstResource) {

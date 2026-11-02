@@ -728,4 +728,6 @@
    <string name="catalog_queued">Кезекте</string>
    <string name="catalog_no_selection">Мәліметтерді көру үшін кітапты таңдаңыз</string>
    <string name="catalog_tab_title">Каталог</string>
+   <string name="catalog_saved_results">Сақталған нәтижелер</string>
+   <string name="catalog_filter_scope">Сүзгілер жүктелген кітаптар тізіміне қолданылады</string>
 </resources>

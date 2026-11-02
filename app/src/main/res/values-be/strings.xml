@@ -728,4 +728,6 @@
    <string name="catalog_queued">У чарзе</string>
    <string name="catalog_no_selection">Выберыце кнігу, каб убачыць падрабязнасці</string>
    <string name="catalog_tab_title">Каталог</string>
+   <string name="catalog_saved_results">Захаваныя вынікі</string>
+   <string name="catalog_filter_scope">Фільтры прымяняюцца да загружанага спіса кніг</string>
 </resources>

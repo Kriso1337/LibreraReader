@@ -728,4 +728,6 @@
    <string name="catalog_queued">În coadă</string>
    <string name="catalog_no_selection">Alegeți o carte pentru a vedea detaliile</string>
    <string name="catalog_tab_title">Catalog</string>
+   <string name="catalog_saved_results">Rezultate salvate</string>
+   <string name="catalog_filter_scope">Filtrele se aplică listei de cărți încărcate</string>
 </resources>

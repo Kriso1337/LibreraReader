@@ -728,4 +728,6 @@
    <string name="catalog_queued">In coa</string>
    <string name="catalog_no_selection">Sèbera unu libru pro bìdere sos detàllios</string>
    <string name="catalog_tab_title">Catàlogu</string>
+   <string name="catalog_saved_results">Resurtados sarvados</string>
+   <string name="catalog_filter_scope">Sos filtros si aplicant a sos libros carrigados</string>
 </resources>

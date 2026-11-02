@@ -1967,23 +1967,20 @@ public class HorizontalViewActivity extends AdsFragmentActivity {
         TintUtil.setTintBgSimple(actionBar, AppState.get().transparencyUI);
         TintUtil.setTintBgSimple(bottomBar, AppState.get().transparencyUI);
         TxtUtils.updateAllLinks(parentParent);
+        com.foobnix.pdf.info.view.ReaderChrome.apply(this);
         // TintUtil.setBackgroundFillColorBottomRight(ttsActive,
         // ColorUtils.setAlphaComponent(TintUtil.color, 230));
 
     }
 
-    // The name and chapter keep a fixed width, 60% of the screen but clear of the corner
-    // buttons, so the cover beside them stays in place when the chapter changes.
+    // Use the row's measured room; localized Configuration may retain the previous width
+    // after rotation, and large type still needs both corner actions to remain reachable.
     private void updateTitleBlockWidth() {
         final View titleBlock = findViewById(R.id.titleBlock);
-        if (titleBlock == null) {
-            return;
-        }
-        final int screen = Dips.dpToPx(getResources().getConfiguration().screenWidthDp);
-        // the bar's side margins (2 x 50dip) and the cover with its gap (34 + 8dip)
-        final int room = screen - Dips.dpToPx(2 * 50 + 34 + 8);
-        titleBlock.getLayoutParams().width = Math.min(screen * 6 / 10, room);
-        titleBlock.requestLayout();
+        if (titleBlock == null || !(titleBlock.getLayoutParams() instanceof LinearLayout.LayoutParams)) return;
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) titleBlock.getLayoutParams();
+        params.width = 0; params.weight = 1;
+        titleBlock.setLayoutParams(params);
     }
 
     // @Override

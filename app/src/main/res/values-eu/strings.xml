@@ -728,4 +728,6 @@
    <string name="catalog_queued">Ilaran</string>
    <string name="catalog_no_selection">Aukeratu liburu bat xehetasunak ikusteko</string>
    <string name="catalog_tab_title">Katalogoa</string>
+   <string name="catalog_saved_results">Gordetako emaitzak</string>
+   <string name="catalog_filter_scope">Iragazkiak kargatutako liburuei aplikatzen zaizkie</string>
 </resources>

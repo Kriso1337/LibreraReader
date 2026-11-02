@@ -728,4 +728,6 @@
    <string name="catalog_queued">في قائمة الانتظار</string>
    <string name="catalog_no_selection">اختر كتابًا لعرض التفاصيل</string>
    <string name="catalog_tab_title">الفهرس</string>
+   <string name="catalog_saved_results">النتائج المحفوظة</string>
+   <string name="catalog_filter_scope">تُطبّق الفلاتر على الكتب التي تم تحميل بياناتها</string>
 </resources>

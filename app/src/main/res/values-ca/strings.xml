@@ -728,4 +728,6 @@
    <string name="catalog_queued">A la cua</string>
    <string name="catalog_no_selection">Trieu un llibre per veure\'n els detalls</string>
    <string name="catalog_tab_title">Catàleg</string>
+   <string name="catalog_saved_results">Resultats desats</string>
+   <string name="catalog_filter_scope">Els filtres s’apliquen als llibres carregats</string>
 </resources>

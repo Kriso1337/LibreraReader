@@ -728,4 +728,6 @@
    <string name="catalog_queued">در صف</string>
    <string name="catalog_no_selection">برای دیدن جزئیات یک کتاب انتخاب کنید</string>
    <string name="catalog_tab_title">فهرست</string>
+   <string name="catalog_saved_results">نتایج ذخیره‌شده</string>
+   <string name="catalog_filter_scope">فیلترها روی کتاب‌های بارگذاری‌شده اعمال می‌شوند</string>
 </resources>

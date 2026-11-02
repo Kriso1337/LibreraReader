@@ -728,4 +728,6 @@
    <string name="catalog_queued">कतार में</string>
    <string name="catalog_no_selection">विवरण देखने के लिए किताब चुनें</string>
    <string name="catalog_tab_title">कैटलॉग</string>
+   <string name="catalog_saved_results">सहेजे गए परिणाम</string>
+   <string name="catalog_filter_scope">फ़िल्टर लोड की गई किताबों पर लागू होते हैं</string>
 </resources>

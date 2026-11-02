@@ -728,4 +728,6 @@
    <string name="catalog_queued">In ordine</string>
    <string name="catalog_no_selection">Librum elige ut singula videas</string>
    <string name="catalog_tab_title">Catalogus</string>
+   <string name="catalog_saved_results">Exitus servati</string>
+   <string name="catalog_filter_scope">Filtra libris iam oneratis adhibentur</string>
 </resources>

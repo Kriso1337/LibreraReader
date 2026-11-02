@@ -668,6 +668,7 @@ public class MainTabs2 extends AdsFragmentActivity {
         DocumentController.doContextMenu(this);
 
         setContentView(R.layout.main_tabs);
+        com.foobnix.catalog.CatalogWarmup.schedule(getApplicationContext());
         // With the tabs floating at the foot, the headers float at the top too: the page
         // runs the whole height of the screen and they are drawn over it.
         // The page runs the whole height of the screen either way: the chrome floats over
@@ -1156,10 +1157,27 @@ public class MainTabs2 extends AdsFragmentActivity {
             adapter.notifyDataSetChanged();
         }
 
+        applyLibraryChrome();
         IMG.resumeRequests(this);
         //AppSP.get().lastClosedActivity = MainTabs2.class.getSimpleName();
         //LOG.d("lasta save", AppSP.get().lastClosedActivity);
 
+    }
+
+    private void applyLibraryChrome() {
+        View root = findViewById(R.id.parentParent);
+        if (root != null) root.setBackgroundColor(LibraryDesign.paper());
+        if (pager != null) pager.setBackgroundColor(LibraryDesign.paper());
+        if (swipeRefreshLayout != null) swipeRefreshLayout.setColorSchemeColors(LibraryDesign.accent());
+        if (imageMenuParent != null) imageMenuParent.setBackgroundColor(LibraryDesign.paper());
+        if (imageMenu != null) TintUtil.setTintImageNoAlpha(imageMenu, LibraryDesign.accent());
+        if (indicator != null) {
+            indicator.setTabsBackground(LibraryDesign.surface());
+            indicator.updateIcons(pager == null ? 0 : pager.getCurrentItem());
+        }
+        androidx.core.view.WindowInsetsControllerCompat bars = androidx.core.view.WindowCompat.getInsetsController(getWindow(),getWindow().getDecorView());
+        bars.setAppearanceLightStatusBars(!LibraryDesign.dark());
+        bars.setAppearanceLightNavigationBars(!LibraryDesign.dark());
     }
 
     public void updateCurrentFragment() {
@@ -1325,6 +1343,7 @@ public class MainTabs2 extends AdsFragmentActivity {
                         statusBarHack.setBackgroundColor(SlidingTabLayout.floatingTint(TintUtil.color));
                     }
                 }
+                applyLibraryChrome();
             }
         }
     };

@@ -728,4 +728,6 @@
    <string name="catalog_queued">อยู่ในคิว</string>
    <string name="catalog_no_selection">เลือกหนังสือเพื่อดูรายละเอียด</string>
    <string name="catalog_tab_title">แค็ตตาล็อก</string>
+   <string name="catalog_saved_results">ผลลัพธ์ที่บันทึกไว้</string>
+   <string name="catalog_filter_scope">ตัวกรองใช้กับรายการหนังสือที่โหลดแล้ว</string>
 </resources>

@@ -171,20 +171,31 @@ public abstract class DragingPopup {
 
     public void initState() {
         try {
+            View window = (View) anchor.getParent();
+            int inset = Dips.dpToPx(12);
+            int availableWidth = Math.max(Dips.dpToPx(160), window.getWidth() - inset * 2);
+            int availableHeight = Math.max(Dips.dpToPx(120), window.getHeight() - inset * 2);
             String tag = getTAG() + Dips.screenWidth();
             if (cache.containsKey(tag)) {
                 Place place = cache.get(tag);
-                AnchorHelper.setXY(anchor, place.x, place.y);
-                popupView.getLayoutParams().width = place.width;
-                popupView.getLayoutParams().height = place.height;
+                int w = Math.min(availableWidth, Math.max(Dips.dpToPx(240), place.width));
+                int h = Math.min(availableHeight, Math.max(Dips.dpToPx(160), place.height));
+                AnchorHelper.setXY(anchor, Math.max(inset, Math.min(place.x, window.getWidth() - w - inset)),
+                        Math.max(inset, Math.min(place.y, window.getHeight() - h - inset)));
+                popupView.getLayoutParams().width = w;
+                popupView.getLayoutParams().height = h;
 
                 LOG.d("Anchor Load", tag, place.x, place.y, place.width, place.height);
 
                 popupView.requestLayout();
             } else {
-                AnchorHelper.setXY(anchor, Dips.dpToPx(Dips.screenWidthDP() - width) / 2, (Dips.screenHeight() - heigth) / 2);
-                popupView.getLayoutParams().width = Dips.dpToPx(width);
-                popupView.getLayoutParams().height = heigth;// Dips.dpToPx(heigth);
+                // Phone dialogs use the available width; tablets keep a readable settings
+                // column. The actual parent dimensions also work in split-screen/rotation.
+                int w = Math.min(availableWidth, Dips.dpToPx(Math.max(400, Math.min(560, width))));
+                int h = Math.min(availableHeight, Math.max(Dips.dpToPx(280), heigth));
+                AnchorHelper.setXY(anchor, (window.getWidth() - w) / 2, (window.getHeight() - h) / 2);
+                popupView.getLayoutParams().width = w;
+                popupView.getLayoutParams().height = h;
                 popupView.requestLayout();
             }
         } catch (Exception e) {
@@ -211,6 +222,7 @@ public abstract class DragingPopup {
     public void realod() {
         popupContent.removeAllViews();
         popupContent.addView(getContentView(inflater));
+        ReaderChrome.popup(popupView);
     }
 
     public void setTitlePopupIcon(int icon) {
@@ -222,6 +234,11 @@ public abstract class DragingPopup {
     public DragingPopup show(String tag, boolean always, boolean update) {
 
         postAction();
+        // The reader's top and bottom toolbars are elevated surfaces. The dialog's
+        // anchor is their sibling, so raising only the inner CardView leaves its
+        // header and close action behind those bars in a short landscape window.
+        anchor.setElevation(Dips.dpToPx(12));
+        anchor.bringToFront();
         if (tag != null) {
             if (!always) {
                 if (tag.equals(anchor.getTag())) {
@@ -410,6 +427,7 @@ public abstract class DragingPopup {
         });
         TintUtil.setTintBg(left);
         TintUtil.setTintBg(right);
+        ReaderChrome.popup(popupView);
         return this;
 
     }

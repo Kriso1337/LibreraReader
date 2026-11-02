@@ -728,4 +728,6 @@
    <string name="catalog_queued">I kö</string>
    <string name="catalog_no_selection">Välj en bok för att se detaljer</string>
    <string name="catalog_tab_title">Katalog</string>
+   <string name="catalog_saved_results">Sparade resultat</string>
+   <string name="catalog_filter_scope">Filtren gäller de inlästa böckerna</string>
 </resources>

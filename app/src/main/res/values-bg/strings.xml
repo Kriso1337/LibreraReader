@@ -728,4 +728,6 @@
    <string name="catalog_queued">На опашка</string>
    <string name="catalog_no_selection">Изберете книга, за да видите подробностите</string>
    <string name="catalog_tab_title">Каталог</string>
+   <string name="catalog_saved_results">Запазени резултати</string>
+   <string name="catalog_filter_scope">Филтрите се прилагат към заредените книги</string>
 </resources>

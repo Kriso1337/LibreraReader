@@ -11,18 +11,24 @@
         android:layout_height="wrap_content"
         android:clickable="true">
 
-        <LinearLayout
+        <HorizontalScrollView
+            android:id="@+id/readerPrimaryTools"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="58dp"
+            android:layout_marginRight="58dp"
+            android:fillViewport="true"
+            android:scrollbars="none">
+            <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_marginLeft="@dimen/wh_button_big"
-            android:layout_marginRight="@dimen/wh_button_big"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="2dip"
             android:paddingRight="2dip"
-            android:paddingTop="14dip"
-            android:paddingBottom="6dip"
+            android:paddingTop="8dip"
+            android:paddingBottom="8dip"
             >
 
             <ImageView
@@ -141,7 +147,9 @@
                 android:layout_weight="0"
                 android:contentDescription="@string/preferences"
                 android:src="@drawable/glyphicons_137_cogwheel" />
-        </LinearLayout>
+            </LinearLayout>
+
+        </HorizontalScrollView>
 
         <!-- The way back to the library, set in the corner opposite the one that closes the
              book and ringed the same way, so the two read as a pair. -->

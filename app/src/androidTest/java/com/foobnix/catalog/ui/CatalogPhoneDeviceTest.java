@@ -3,6 +3,7 @@ package com.foobnix.catalog.ui;
 import static org.junit.Assert.*;
 
 import android.app.Instrumentation;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.LocaleList;
+import android.os.ParcelFileDescriptor;
+import android.provider.Settings;
 import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +56,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -63,26 +68,31 @@ public class CatalogPhoneDeviceTest {
     private Context context;
     private ActivityScenario<MainTabs2> host;
     private String oldLanguage;
-    private int oldTheme;
+    private int oldTheme, oldRotation, oldAutoRotation;
     private boolean oldDay, oldSystemTheme, oldOffline, hadOffline;
     private float oldAppScale;
     private LocaleList oldLocales;
+    private Map<String, ?> oldCatalogPreferences;
 
     @Before public void setUp() {
         instrumentation = InstrumentationRegistry.getInstrumentation();
         context = instrumentation.getTargetContext();
         AppProfile.init(context);
+        oldRotation = Settings.System.getInt(context.getContentResolver(), Settings.System.USER_ROTATION, 0);
+        oldAutoRotation = Settings.System.getInt(context.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 1);
         AppState state = AppState.get();
         oldLanguage = state.appLang; oldTheme = state.appTheme;
         oldDay = state.isDayNotInvert; oldSystemTheme = state.isSystemThemeColor;
         oldAppScale = BookCSS.get().appFontScale; oldLocales = LocaleList.getDefault();
         SharedPreferences prefs = context.getSharedPreferences("catalog-ui", Context.MODE_PRIVATE);
+        oldCatalogPreferences = new HashMap<>(prefs.getAll());
         hadOffline = prefs.contains("offline"); oldOffline = prefs.getBoolean("offline", false);
-        prefs.edit().putBoolean("offline", true).commit();
+        prefs.edit().putBoolean("offline", true).remove("listMode").remove("filterAuthor")
+                .remove("filterFormat").remove("filterDownloaded").remove("filterSort").commit();
         state.isSystemThemeColor = false; state.appLang = "ru";
     }
 
-    @After public void restoreAppPreferences() {
+    @After public void restoreAppPreferences() throws Exception {
         // Restore before closing: MainTabs2.onPause persists the profile.
         AppState state = AppState.get();
         state.appLang = oldLanguage; state.appTheme = oldTheme;
@@ -90,6 +100,13 @@ public class CatalogPhoneDeviceTest {
         BookCSS.get().appFontScale = oldAppScale;
         SharedPreferences.Editor editor = context.getSharedPreferences("catalog-ui", Context.MODE_PRIVATE).edit();
         if (hadOffline) editor.putBoolean("offline", oldOffline); else editor.remove("offline");
+        for (String key : new String[]{"listMode", "filterAuthor", "filterFormat", "filterDownloaded", "filterSort"}) {
+            Object value = oldCatalogPreferences.get(key);
+            if (value instanceof String) editor.putString(key, (String) value);
+            else if (value instanceof Boolean) editor.putBoolean(key, (Boolean) value);
+            else if (value instanceof Integer) editor.putInt(key, (Integer) value);
+            else editor.remove(key);
+        }
         editor.commit();
         if (host != null) {
             host.onActivity(activity -> {
@@ -100,6 +117,18 @@ public class CatalogPhoneDeviceTest {
             host.close();
         }
         LocaleList.setDefault(oldLocales);
+        if (Settings.System.getInt(context.getContentResolver(), Settings.System.USER_ROTATION, 0) != oldRotation
+                || Settings.System.getInt(context.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 1) != oldAutoRotation) {
+            restoreRotation("cmd window user-rotation lock " + oldRotation);
+            if (oldAutoRotation == 1) restoreRotation("cmd window user-rotation free");
+        }
+    }
+
+    private void restoreRotation(String command) throws Exception {
+        try (ParcelFileDescriptor fd = instrumentation.getUiAutomation().executeShellCommand(command);
+                java.io.InputStream input = new ParcelFileDescriptor.AutoCloseInputStream(fd)) {
+            byte[] buffer = new byte[256]; while (input.read(buffer) != -1) { }
+        }
     }
 
     @Test public void portraitShelfKeyboardDetailsAndFailedQueueAreUsable() throws Exception {
@@ -162,6 +191,67 @@ public class CatalogPhoneDeviceTest {
         host.onActivity(activity -> assertTrue(activity.getResources().getConfiguration().fontScale >= 1.9f));
         fixture(true, false); checkGeometry(); revealPrimary(); revealFolder(); screenshot("phone-dark-large-text-actions");
         fixture(false, true); checkGeometry(); screenshot("phone-dark-large-text-downloads");
+    }
+
+    @Test public void listAndFiltersRemainUsableWithLargeText() throws Exception {
+        launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, 2f, true);
+        fixture(false, false);
+        host.onActivity(activity -> invoke(catalog(activity), "toggleView", new Class[0]));
+        settle(); checkGeometry(); screenshot("phone-catalog-list");
+        final AlertDialog[] dialog = new AlertDialog[1];
+        host.onActivity(activity -> {
+            CatalogFragment fragment = catalog(activity);
+            assertEquals(1, field(fragment, "layout", androidx.recyclerview.widget.GridLayoutManager.class).getSpanCount());
+            try {
+                Method method = fragment.getClass().getDeclaredMethod("chooseFilters"); method.setAccessible(true);
+                dialog[0] = (AlertDialog) method.invoke(fragment);
+            } catch (Exception failure) { throw new AssertionError(failure); }
+        });
+        settle(); screenshot("phone-catalog-filters");
+        host.onActivity(activity -> {
+            View decor = dialog[0].getWindow().getDecorView();
+            EditText author = findType(decor, EditText.class); assertNotNull(author); author.setText("Пушкин");
+            Button apply = findButton(decor, activity.getString(R.string.apply)); assertNotNull(apply);
+            apply.requestRectangleOnScreen(new Rect(0,0,apply.getWidth(),apply.getHeight()), true);
+        });
+        settle(); screenshot("phone-catalog-filter-actions");
+        host.onActivity(activity -> {
+            Button apply = findButton(dialog[0].getWindow().getDecorView(), activity.getString(R.string.apply));
+            assertFullyVisible(apply); apply.performClick();
+        });
+        settle();
+        host.onActivity(activity -> {
+            RecyclerView list = field(catalog(activity), "recyclerView", RecyclerView.class);
+            assertEquals("Author filter changes displayed books", 1, list.getAdapter().getItemCount());
+            assertTrue("List preference persists", context.getSharedPreferences("catalog-ui", Context.MODE_PRIVATE).getBoolean("listMode",false));
+        });
+        screenshot("phone-catalog-filtered-list");
+        host.onActivity(activity -> {
+            CatalogFragment fragment = catalog(activity);
+            try {
+                Class<?> location = Class.forName("com.foobnix.ui2.fragment.CatalogFragment$Location");
+                java.lang.reflect.Constructor<?> constructor = location.getDeclaredConstructor(String.class,String.class,boolean.class);
+                constructor.setAccessible(true);
+                Object missing = constructor.newInstance("https://flibusta.is/opds/acceptance-missing-page", "", false);
+                invoke(fragment,"request",new Class[]{location,boolean.class},missing,false);
+                assertNull("Back/navigation must not leave books from a different page",field(fragment,"page",Object.class));
+            } catch (Exception failure) { throw new AssertionError(failure); }
+        });
+    }
+
+    private static <T extends View> T findType(View root, Class<T> type) {
+        if (type.isInstance(root)) return type.cast(root);
+        if (root instanceof ViewGroup) for (int i=0;i<((ViewGroup)root).getChildCount();i++) {
+            T found=findType(((ViewGroup)root).getChildAt(i),type); if(found!=null)return found;
+        }
+        return null;
+    }
+    private static Button findButton(View root, String label) {
+        if (root instanceof Button && label.contentEquals(((Button)root).getText()))return (Button)root;
+        if (root instanceof ViewGroup) for (int i=0;i<((ViewGroup)root).getChildCount();i++) {
+            Button found=findButton(((ViewGroup)root).getChildAt(i),label); if(found!=null)return found;
+        }
+        return null;
     }
 
     private void launch(int orientation, float scale, boolean dark) {

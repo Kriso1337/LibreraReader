@@ -728,4 +728,6 @@
    <string name="catalog_queued">已加入队列</string>
    <string name="catalog_no_selection">选择一本书查看详情</string>
    <string name="catalog_tab_title">目录</string>
+   <string name="catalog_saved_results">已保存的结果</string>
+   <string name="catalog_filter_scope">筛选条件适用于已加载的图书列表</string>
 </resources>

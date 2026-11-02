@@ -728,4 +728,6 @@
    <string name="catalog_queued">בתור</string>
    <string name="catalog_no_selection">בחרו ספר כדי לראות פרטים</string>
    <string name="catalog_tab_title">קטלוג</string>
+   <string name="catalog_saved_results">תוצאות שמורות</string>
+   <string name="catalog_filter_scope">המסננים חלים על הספרים שנטענו</string>
 </resources>

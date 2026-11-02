@@ -7,10 +7,10 @@
     android:focusableInTouchMode="true"
     android:orientation="vertical">
 
-    <LinearLayout
+    <com.foobnix.ui2.LibraryHeader
         android:id="@+id/pathContainer"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/wh_button"
+        android:layout_height="wrap_content"
         android:background="@drawable/bg_search_second"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -131,7 +131,7 @@
             android:layout_weight="0"
             android:contentDescription="@string/menu"
             android:src="@drawable/my_glyphicons_114_paragraph_justify" />
-    </LinearLayout>
+    </com.foobnix.ui2.LibraryHeader>
 
     <include layout="@layout/panel_on_grant" />
 

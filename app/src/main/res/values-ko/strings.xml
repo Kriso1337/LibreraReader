@@ -728,4 +728,6 @@
    <string name="catalog_queued">대기 중</string>
    <string name="catalog_no_selection">책을 선택하여 세부 정보 보기</string>
    <string name="catalog_tab_title">카탈로그</string>
+   <string name="catalog_saved_results">저장된 결과</string>
+   <string name="catalog_filter_scope">필터는 불러온 책에 적용됩니다</string>
 </resources>

@@ -728,4 +728,6 @@
    <string name="catalog_queued">Eilėje</string>
    <string name="catalog_no_selection">Pasirinkite knygą, kad matytumėte išsamią informaciją</string>
    <string name="catalog_tab_title">Katalogas</string>
+   <string name="catalog_saved_results">Išsaugoti rezultatai</string>
+   <string name="catalog_filter_scope">Filtrai taikomi įkeltam knygų sąrašui</string>
 </resources>

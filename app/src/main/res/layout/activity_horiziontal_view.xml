@@ -297,7 +297,13 @@
                     android:src="@drawable/glyphicons_599_menu_close" />
             </RelativeLayout>
 
-            <LinearLayout
+            <HorizontalScrollView
+                android:id="@+id/readerAppearanceTools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fillViewport="true"
+                android:scrollbars="none">
+                <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -381,7 +387,8 @@
                     android:layout_weight="0"
                     android:contentDescription="@string/preferences"
                     android:src="@drawable/glyphicons_137_cogwheel" />
-            </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
 
 
 

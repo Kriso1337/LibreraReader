@@ -728,4 +728,6 @@
    <string name="catalog_queued">வரிசையில்</string>
    <string name="catalog_no_selection">விவரங்களைக் காண ஒரு புத்தகத்தைத் தேர்ந்தெடுக்கவும்</string>
    <string name="catalog_tab_title">பட்டியல்</string>
+   <string name="catalog_saved_results">சேமிக்கப்பட்ட முடிவுகள்</string>
+   <string name="catalog_filter_scope">ஏற்றப்பட்ட புத்தகப் பட்டியலுக்கு வடிகட்டிகள் பொருந்தும்</string>
 </resources>

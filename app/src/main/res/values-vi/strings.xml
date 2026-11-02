@@ -728,4 +728,6 @@
    <string name="catalog_queued">Trong hàng đợi</string>
    <string name="catalog_no_selection">Chọn sách để xem chi tiết</string>
    <string name="catalog_tab_title">Danh mục</string>
+   <string name="catalog_saved_results">Kết quả đã lưu</string>
+   <string name="catalog_filter_scope">Bộ lọc áp dụng cho danh sách sách đã tải</string>
 </resources>

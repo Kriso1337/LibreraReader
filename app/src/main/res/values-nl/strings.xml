@@ -728,4 +728,6 @@
    <string name="catalog_queued">In wachtrij</string>
    <string name="catalog_no_selection">Kies een boek om de details te bekijken</string>
    <string name="catalog_tab_title">Catalogus</string>
+   <string name="catalog_saved_results">Opgeslagen resultaten</string>
+   <string name="catalog_filter_scope">Filters gelden voor de geladen boeken</string>
 </resources>

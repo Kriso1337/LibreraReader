@@ -51,6 +51,7 @@ import com.foobnix.ui2.AppDB.SORT_BY;
 import com.foobnix.ui2.AppRecycleAdapter;
 import com.foobnix.pdf.info.wrapper.MagicHelper;
 import com.foobnix.ui2.MainTabs2;
+import com.foobnix.ui2.LibraryDesign;
 import com.foobnix.ui2.adapter.AuthorsAdapter2.AuthorViewHolder;
 import com.foobnix.ui2.fast.FastScroller;
 
@@ -211,6 +212,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             }
 
             TintUtil.setBackgroundFillColor(holder.parent, TintUtil.color);
+            if (holder.parent.getContext() instanceof MainTabs2) LibraryDesign.paintHeader(holder.parent);
         }
         if (holderAll instanceof FileMetaViewHolder) {
 
@@ -457,6 +459,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
 
             TintUtil.setBackgroundFillColor(holder.panelRecent, TintUtil.color);
             TintUtil.setBackgroundFillColor(holder.panelStars, TintUtil.color);
+            if (holder.panelRecent.getContext() instanceof MainTabs2) { LibraryDesign.paintHeader(holder.panelRecent); LibraryDesign.paintHeader(holder.panelStars); }
 
             List<FileMeta> allStars = AppData.get().getAllFavoriteFiles(false);
 
@@ -466,7 +469,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
 
             holder.recentName.setText(holder.getString(R.string.recent) + " (" + (getItemCount() - 1) + ")");
             holder.starredNameIcon.setImageResource(R.drawable.glyphicons_13_heart);
-            TintUtil.setTintImageNoAlpha(holder.starredNameIcon, Color.WHITE);
+            TintUtil.setTintImageNoAlpha(holder.starredNameIcon, holder.starredNameIcon.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : Color.WHITE);
 
             holder.starredName.setOnClickListener(new OnClickListener() {
 
@@ -480,7 +483,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
                         public boolean onMenuItemClick(MenuItem item) {
                             AppState.get().recentTag = "";
                             holder.starredNameIcon.setImageResource(R.drawable.glyphicons_13_heart);
-                            TintUtil.setTintImageNoAlpha(holder.starredNameIcon, Color.WHITE);
+                            TintUtil.setTintImageNoAlpha(holder.starredNameIcon, holder.starredNameIcon.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : Color.WHITE);
 
                             holder.starredName.setText(STARRED);
 
@@ -503,7 +506,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
                             public boolean onMenuItemClick(MenuItem item) {
                                 AppState.get().recentTag = tag;
                                 holder.starredNameIcon.setImageResource(R.drawable.glyphicons_67_tags);
-                                TintUtil.setTintImageNoAlpha(holder.starredNameIcon, Color.WHITE);
+                                TintUtil.setTintImageNoAlpha(holder.starredNameIcon, holder.starredNameIcon.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : Color.WHITE);
 
                                 holder.starredName.setText(nameName);
 
@@ -524,7 +527,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
                         public boolean onMenuItemClick(MenuItem item) {
                             AppState.get().recentTag = Playlists.L_PLAYLIST;
                             holder.starredNameIcon.setImageResource(R.drawable.glyphicons_160_playlist);
-                            TintUtil.setTintImageNoAlpha(holder.starredNameIcon, Color.WHITE);
+                            TintUtil.setTintImageNoAlpha(holder.starredNameIcon, holder.starredNameIcon.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : Color.WHITE);
                             holder.starredName.setText(nameName);
 
                             adapter.getItemsList().clear();
@@ -542,7 +545,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             adapter.getItemsList().clear();
             if (TxtUtils.isEmpty(AppState.get().recentTag)) {
                 holder.starredNameIcon.setImageResource(R.drawable.glyphicons_13_heart);
-                TintUtil.setTintImageNoAlpha(holder.starredNameIcon, Color.WHITE);
+                TintUtil.setTintImageNoAlpha(holder.starredNameIcon, holder.starredNameIcon.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : Color.WHITE);
 
                 holder.starredName.setText(STARRED);
                 adapter.getItemsList().addAll(allStars);
@@ -551,7 +554,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
                 final String nameName = holder.getString(R.string.playlists) + " (" + playlists.size() + ")";
 
                 holder.starredNameIcon.setImageResource(R.drawable.glyphicons_160_playlist);
-                TintUtil.setTintImageNoAlpha(holder.starredNameIcon, Color.WHITE);
+                TintUtil.setTintImageNoAlpha(holder.starredNameIcon, holder.starredNameIcon.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : Color.WHITE);
 
                 holder.starredName.setText(nameName);
                 adapter.getItemsList().addAll(playlists);
@@ -559,7 +562,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             } else {
 
                 holder.starredNameIcon.setImageResource(R.drawable.glyphicons_67_tags);
-                TintUtil.setTintImageNoAlpha(holder.starredNameIcon, Color.WHITE);
+                TintUtil.setTintImageNoAlpha(holder.starredNameIcon, holder.starredNameIcon.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : Color.WHITE);
 
                 List<FileMeta> allTags = AppDB.get().searchBy("@tags " + AppState.get().recentTag, SORT_BY.FILE_NAME, false);
                 adapter.getItemsList().addAll(allTags);
@@ -744,7 +747,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             TintUtil.setProgressLine(holder.idProgressBg,
                                      ContextCompat.getColor(holder.idProgressBg.getContext(),
                                              R.color.lt_grey_dima),
-                                     TintUtil.color,
+                                     holder.parent.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : TintUtil.color,
                                      recentProgress);
             holder.idPercentText.setText("" + Math.round(100f * recentProgress) + "%");
 
@@ -858,15 +861,11 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             holder.size.setVisibility(View.VISIBLE);
 
             int coverWidth = Dips.dpToPx(AppState.get().coverSmallSize);
-            int coverHeight = (int) (coverWidth * IMG.WIDTH_DK);
+            boolean libraryRow = holder.parent.getContext() instanceof MainTabs2;
+            int coverHeight = Math.round(coverWidth * (libraryRow ? 1.4f : IMG.WIDTH_DK));
 
-            // The cover runs the full height of the row instead of floating in the middle of
-            // it: the slot keeps the cover width and stretches to whatever height the text
-            // beside it needs, so no card is left showing above or below the image.
-            // The cover is cut flush into the corner of the card it fills the end of, and the
-            // card's own round is what rounds it. Where there is no card to see - the black
-            // theme, or borders turned off - the cover is a tile of its own and carries the
-            // round on all four corners instead.
+            // Reader dialogs keep their existing geometry. Library rows show a stable
+            // jacket beside the text, so long descriptions do not crop decorative titles.
             if (holder.imageParent instanceof CardView) {
                 boolean cardShows = AppState.get().isBorderAndShadow &&
                         AppState.get().appTheme != AppState.THEME_DARK_OLED;
@@ -875,16 +874,21 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
 
             LayoutParams parentLp = IMG.updateImageSizeSmall(holder.imageParent);
             if (parentLp != null) {
-                parentLp.height = LayoutParams.MATCH_PARENT;
+                // A taller description must not stretch the jacket's crop and cut its text.
+                // The user's crop/fit choice still applies inside this stable book ratio.
+                parentLp.height = libraryRow ? coverHeight : LayoutParams.MATCH_PARENT;
+                if (libraryRow && parentLp instanceof ViewGroup.MarginLayoutParams) {
+                    ((ViewGroup.MarginLayoutParams)parentLp).setMargins(Dips.dpToPx(8),Dips.dpToPx(8),Dips.dpToPx(12),Dips.dpToPx(8));
+                }
+                holder.imageParent.setLayoutParams(parentLp);
             }
             holder.imageParent.setMinimumHeight(coverHeight);
 
             LayoutParams lp = holder.image.getLayoutParams();
             lp.width = coverWidth;
-            lp.height = LayoutParams.MATCH_PARENT;
+            lp.height = libraryRow ? coverHeight : LayoutParams.MATCH_PARENT;
 
-            // A short row is still only as tall as the cover: without a ceiling the stretched
-            // image would measure itself against the whole bitmap and drag the row out with it.
+            holder.image.setLayoutParams(lp);
             holder.image.setAdjustViewBounds(false);
             holder.image.setMaxHeight(coverHeight);
         }
@@ -1027,6 +1031,21 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
         TxtUtils.setInkTextView(holder.title, holder.author, holder.path, holder.browserExt, holder.size, holder.date, holder.series, holder.idPercentText);
 
         Apps.accessibilityButtonSize(holder.star, holder.menu);
+        if (holder.parent.getContext() instanceof MainTabs2) {
+            LibraryDesign.card(holder.parent, adapterType == ADAPTER_COVERS);
+            holder.title.setTextColor(LibraryDesign.ink());
+            holder.author.setTextColor(AppState.get().isUiTextColor ? AppState.get().uiTextColor : LibraryDesign.muted());
+            holder.title.setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD);
+            if (adapterType == ADAPTER_GRID) { holder.title.setSingleLine(false); holder.title.setMaxLines(3); holder.title.setTextSize(16); }
+            if (holder.layoutBootom != null) holder.layoutBootom.setPadding(Dips.dpToPx(10),Dips.dpToPx(10),Dips.dpToPx(10),Dips.dpToPx(6));
+            for (TextView label : new TextView[]{holder.path,holder.browserExt,holder.size,holder.date,holder.series,holder.idPercentText})
+                if (label != null) label.setTextColor(label == holder.series && AppState.get().isUiTextColor ? AppState.get().uiTextColor : LibraryDesign.muted());
+            LibraryDesign.action(holder.star); LibraryDesign.action(holder.menu); LibraryDesign.action(holder.remove);
+            if (holder.star.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams actionParams=(ViewGroup.MarginLayoutParams)holder.star.getLayoutParams();
+                actionParams.setMarginEnd(Dips.dpToPx(8));holder.star.setLayoutParams(actionParams);
+            }
+        }
 
         return fileMeta;
     }
@@ -1197,6 +1216,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             return;
         }
         CardView card = (CardView) row;
+        LibraryDesign.card(row, false);
         Object saved = card.getTag(R.id.cardElevation);
         if (saved == null) {
             saved = card.getCardElevation();

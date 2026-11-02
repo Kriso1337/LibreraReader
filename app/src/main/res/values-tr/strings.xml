@@ -728,4 +728,6 @@
    <string name="catalog_queued">Sırada</string>
    <string name="catalog_no_selection">Ayrıntıları görmek için bir kitap seçin</string>
    <string name="catalog_tab_title">Katalog</string>
+   <string name="catalog_saved_results">Kaydedilen sonuçlar</string>
+   <string name="catalog_filter_scope">Filtreler yüklenen kitap listesine uygulanır</string>
 </resources>

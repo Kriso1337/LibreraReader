@@ -32,6 +32,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -39,6 +41,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,9 +67,12 @@ import com.foobnix.catalog.CatalogDownloads;
 import com.foobnix.catalog.CatalogEntry;
 import com.foobnix.catalog.CatalogPage;
 import com.foobnix.catalog.CatalogRepository;
+import com.foobnix.catalog.CatalogWarmup;
+import com.foobnix.catalog.ui.CatalogBrowseOptions;
 import com.foobnix.catalog.ui.CatalogLayoutPolicy;
 import com.foobnix.dao2.FileMeta;
 import com.foobnix.model.AppState;
+import com.foobnix.ui2.LibraryDesign;
 import com.foobnix.pdf.SlidingTabLayout;
 import com.foobnix.pdf.info.ExtUtils;
 import com.foobnix.pdf.info.R;
@@ -81,6 +87,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -99,13 +108,15 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     private SharedPreferences preferences;
     private LinearLayout root, header, body, master, detailBox, statusBox;
     private LinearLayout normalTop, searchRow, compactRow, masterHeading;
-    private HorizontalScrollView sectionStrip;
+    private HorizontalScrollView sectionStrip, browseStrip;
     private View sectionGap, searchGap;
     private Button compactSearchMenu, statusRetry;
     private ScrollView detailScroll;
     private EditText search;
     private TextView pageTitle, statusText, detailStatus;
-    private Button previous, next, primary, sourceButton;
+    private Button previous, next, primary, sourceButton, filtersButton, viewButton;
+    private final CatalogBrowseOptions browse = new CatalogBrowseOptions();
+    private boolean listMode, initialRequestStarted;
     private ProgressBar loading, detailProgress;
     private GridLayoutManager layout;
     private ShelfAdapter adapter;
@@ -144,6 +155,11 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         preferences = context.getSharedPreferences("catalog-ui", Context.MODE_PRIVATE);
         treeUri = preferences.getString("tree", null);
         offline = preferences.getBoolean("offline", false);
+        listMode = preferences.getBoolean("listMode", false);
+        browse.author = preferences.getString("filterAuthor", "");
+        browse.format = preferences.getString("filterFormat", "");
+        browse.downloaded = preferences.getBoolean("filterDownloaded", false);
+        browse.sort = preferences.getInt("filterSort", 0);
         if (state != null) {
             section = state.getString("section", CATALOG);
             searchDraft = state.getString("draft", "");
@@ -176,7 +192,8 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         createHeader();
         createBody();
         showSection();
-        request(location, false);
+        // ViewPager keeps all tabs alive: hidden creation must not start foreground
+        // networking. Speculative work is owned by the constrained warmup worker.
         // UIFragment's legacy chrome routine assumes one scroller under one tinted
         // header. Both bookshelf panes must instead clear the app's floating tabs.
         FrameLayout frame = new FrameLayout(requireContext());
@@ -241,15 +258,9 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     }
 
     private void palette() {
-        boolean dark = AppState.get().appTheme == AppState.THEME_DARK
-                || AppState.get().appTheme == AppState.THEME_DARK_OLED;
-        paper = Color.parseColor(dark ? "#181E1B" : "#F7F5EE");
-        surface = Color.parseColor(dark ? "#232C27" : "#FFFEF9");
-        ink = Color.parseColor(dark ? "#EDF1E6" : "#243C31");
-        muted = Color.parseColor(dark ? "#ABB9AD" : "#66746B");
-        accent = Color.parseColor(dark ? "#B5D0BA" : "#244C3A");
-        onAccent = Color.parseColor(dark ? "#173323" : "#FFFEF8");
-        line = Color.parseColor(dark ? "#39473D" : "#DFE3D8");
+        paper = LibraryDesign.paper(); surface = LibraryDesign.surface();
+        ink = LibraryDesign.ink(); muted = LibraryDesign.muted();
+        accent = LibraryDesign.accent(); onAccent = LibraryDesign.onAccent(); line = LibraryDesign.line();
     }
 
     private void createHeader() {
@@ -338,6 +349,22 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         pageTitle.setPadding(dp(10), 0, 0, 0);
         heading.addView(pageTitle, new LinearLayout.LayoutParams(0, -2, 1));
         master.addView(heading, matchWrap());
+        LinearLayout browsing = row();
+        Button genres = button(getString(R.string.genre), false, v -> openDirectory("genres"));
+        Button authors = button(getString(R.string.author), false, v -> openDirectory("authors"));
+        filtersButton = button(getString(R.string.filter), false, v -> chooseFilters());
+        viewButton = button(getString(listMode ? R.string.grid : R.string.list), false, v -> toggleView());
+        viewButton.setContentDescription(getString(R.string.cd_show_results_as_a_list_or_grid));
+        for (Button control : new Button[]{genres, authors, filtersButton, viewButton}) {
+            control.setSingleLine(true); control.setMinWidth(dp(48));
+            LinearLayout.LayoutParams params = wrapWrap(); params.setMarginEnd(dp(8));
+            browsing.addView(control, params);
+        }
+        browseStrip = new HorizontalScrollView(requireContext());
+        browseStrip.setHorizontalScrollBarEnabled(false);
+        browseStrip.addView(browsing, new HorizontalScrollView.LayoutParams(-2, -2));
+        LinearLayout.LayoutParams browseParams = matchWrap(); browseParams.topMargin = dp(8); browseParams.bottomMargin = dp(8);
+        master.addView(browseStrip, browseParams);
         statusBox = column();
         statusBox.setPadding(dp(12), dp(8), dp(12), dp(8));
         statusBox.setBackground(shape(surface, 12, line));
@@ -393,8 +420,8 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         boolean previousCompactBooks = compactBooks;
         // A language-specific Configuration can retain its original orientation.
         // The measured window, including split-screen, is the layout authority.
-        compactBooks = compactHeader && !dualPane && !imeVisible && available > availableHeight;
-        int columns = compactBooks ? CatalogLayoutPolicy.compactColumns(listWidth, getResources().getConfiguration().fontScale)
+        compactBooks = listMode || (compactHeader && !dualPane && !imeVisible && available > availableHeight);
+        int columns = listMode ? 1 : compactBooks ? CatalogLayoutPolicy.compactColumns(listWidth, getResources().getConfiguration().fontScale)
                 : CatalogLayoutPolicy.columns(listWidth, getResources().getConfiguration().fontScale);
         int width = Math.round(listWidth * density());
         boolean changedBooks = previousCompactBooks != compactBooks || bookLayoutWidth != width
@@ -413,6 +440,7 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         if (compactSearchMenu != null) compactSearchMenu.setVisibility(compactHeader && !imeVisible ? View.VISIBLE : View.GONE);
         compactRow.setVisibility(compactHeader && !imeVisible && !showSearch ? View.VISIBLE : View.GONE);
         masterHeading.setVisibility(compactHeader || imeVisible ? View.GONE : View.VISIBLE);
+        browseStrip.setVisibility(!compactHeader && !imeVisible && CATALOG.equals(section) ? View.VISIBLE : View.GONE);
         statusRetry.setVisibility(compactHeader || imeVisible ? View.GONE : View.VISIBLE);
         statusText.setMaxLines(compactHeader || imeVisible ? 1 : Integer.MAX_VALUE);
         statusText.setEllipsize(compactHeader || imeVisible ? TextUtils.TruncateAt.END : null);
@@ -441,7 +469,7 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
 
     private void retryPage() {
         offline = false; preferences.edit().putBoolean("offline", false).apply();
-        request(location, false);
+        request(location, false, true);
     }
 
     /** Compact windows retain every navigation action without spending three fixed rows. */
@@ -456,6 +484,10 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
             labels.add(getString(R.string.back)); actions.add(this::onBackAction);
         }
         if (CATALOG.equals(section)) {
+            labels.add(getString(R.string.genre)); actions.add(() -> openDirectory("genres"));
+            labels.add(getString(R.string.author)); actions.add(() -> openDirectory("authors"));
+            labels.add(getString(R.string.filter)); actions.add(this::chooseFilters);
+            labels.add(getString(listMode ? R.string.grid : R.string.list)); actions.add(this::toggleView);
             labels.add(getString(R.string.try_again)); actions.add(this::retryPage);
             if (page != null && !empty(page.nextUrl)) {
                 labels.add(getString(R.string.next_page));
@@ -477,7 +509,124 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         request(new Location(null, searchDraft, !searchDraft.isEmpty()), true);
     }
 
+    private void toggleView() {
+        saveScroll();
+        listMode = !listMode;
+        preferences.edit().putBoolean("listMode", listMode).apply();
+        showSection();
+    }
+
+    /** These are advertised server directories, not a filter over one downloaded page. */
+    private void openDirectory(String kind) {
+        final int id = ++generation, viewId = viewGeneration;
+        if (requestFuture != null) requestFuture.cancel(true);
+        repository.cancel(); busy = true; error = null; updateStatus();
+        final boolean cacheOnly = offline;
+        requestFuture = network.submit(() -> {
+            try {
+                CatalogPage directory;
+                try { directory = repository.cached(null); }
+                catch (Exception missing) { directory = repository.load(null, cacheOnly); }
+                String destination = directory.url;
+                for (CatalogEntry entry : directory.entries) {
+                    if (!empty(entry.navigationUrl) && Uri.parse(entry.navigationUrl).getPath().contains("/" + kind)) {
+                        destination = entry.navigationUrl; break;
+                    }
+                }
+                final String address = destination;
+                ui.post(() -> {
+                    if (id != generation || viewId != viewGeneration || root == null || !isAdded()) return;
+                    request(new Location(address, "", false), true);
+                });
+            } catch (Exception failure) {
+                ui.post(() -> {
+                    if (id != generation || viewId != viewGeneration || root == null) return;
+                    busy = false; error = cacheOnly ? "cache" : "network"; updateStatus();
+                });
+            }
+        });
+    }
+
+    private AlertDialog chooseFilters() {
+        LinearLayout content = column(); content.setPadding(dp(20), dp(12), dp(20), dp(20));
+        content.setBackgroundColor(paper);
+        TextView scope = text(getString(R.string.catalog_filter_scope), 14, muted);
+        content.addView(scope, matchWrap()); space(content, 16);
+        content.addView(text(getString(R.string.author), 14, muted), matchWrap());
+        EditText author = new EditText(requireContext()); author.setText(browse.author);
+        author.setTextColor(ink); author.setHintTextColor(muted); author.setSingleLine(true);
+        author.setMinHeight(dp(48)); author.setHint(R.string.author);
+        content.addView(author, matchWrap()); space(content, 12);
+        TreeSet<String> offered = new TreeSet<>();
+        if (page != null) for (CatalogEntry entry : page.entries)
+            for (CatalogAcquisition acquisition : entry.acquisitions) offered.add(acquisition.format);
+        if (!browse.format.isEmpty()) offered.add(browse.format);
+        List<String> formats = new ArrayList<>(); formats.add("—"); formats.addAll(offered);
+        content.addView(text(getString(R.string.file), 14, muted), matchWrap());
+        Spinner format = choices(formats); format.setSelection(Math.max(0, formats.indexOf(browse.format)));
+        content.addView(format, matchWrap()); space(content, 12);
+        CheckBox local = new CheckBox(requireContext()); local.setText(R.string.catalog_on_device);
+        local.setTextColor(ink); local.setTextSize(16); local.setMinHeight(dp(48)); local.setChecked(browse.downloaded);
+        local.setButtonTintList(ColorStateList.valueOf(accent)); content.addView(local, matchWrap()); space(content, 12);
+        content.addView(text(getString(R.string.cd_sort_order), 14, muted), matchWrap());
+        List<String> sorts = new ArrayList<>();
+        sorts.add(getString(R.string.automatic)); sorts.add(getString(R.string.by_title)); sorts.add(getString(R.string.by_author));
+        Spinner sort = choices(sorts); sort.setSelection(Math.max(0, Math.min(2, browse.sort)));
+        content.addView(sort, matchWrap());
+        ScrollView scroll = new ScrollView(requireContext()); scroll.addView(content);
+        TextView heading = text(getString(R.string.filter), 24, ink);
+        heading.setTypeface(Typeface.create("serif", Typeface.NORMAL));
+        heading.setPadding(dp(20), dp(20), dp(20), dp(8));
+        AlertDialog dialog = new AlertDialog.Builder(requireContext()).setCustomTitle(heading).setView(scroll).create();
+        space(content, 16);
+        content.addView(button(getString(R.string.apply), true, v -> {
+                    browse.author = author.getText().toString().trim();
+                    browse.format = format.getSelectedItemPosition() == 0 ? "" : formats.get(format.getSelectedItemPosition());
+                    browse.downloaded = local.isChecked(); browse.sort = sort.getSelectedItemPosition();
+                    saveFilters(); dialog.dismiss();
+                }), matchWrap());
+        space(content, 8);
+        content.addView(button(getString(R.string.reset), false, v -> {
+                    browse.author = ""; browse.format = ""; browse.downloaded = false; browse.sort = 0; saveFilters();
+                    dialog.dismiss();
+                }), matchWrap());
+        space(content, 8);
+        content.addView(button(getString(R.string.cancel), false, v -> dialog.dismiss()), matchWrap());
+        dialog.show();
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(shape(paper, 20, line));
+        return dialog;
+    }
+
+    private Spinner choices(List<String> labels) {
+        Spinner spinner = new Spinner(requireContext()); spinner.setMinimumHeight(dp(48));
+        ArrayAdapter<String> values = new ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_dropdown_item, labels) {
+            private View style(View view) {
+                if (view instanceof TextView) {
+                    TextView text = (TextView) view; text.setTextColor(ink); text.setTextSize(16);
+                    text.setMinHeight(dp(48)); text.setGravity(Gravity.CENTER_VERTICAL);
+                    text.setPadding(dp(12), dp(8), dp(12), dp(8)); text.setBackgroundColor(surface);
+                }
+                return view;
+            }
+            @Override public View getView(int position, View convertView, ViewGroup parent) { return style(super.getView(position, convertView, parent)); }
+            @Override public View getDropDownView(int position, View convertView, ViewGroup parent) { return style(super.getDropDownView(position, convertView, parent)); }
+        };
+        spinner.setAdapter(values); return spinner;
+    }
+
+    private void saveFilters() {
+        preferences.edit().putString("filterAuthor", browse.author).putString("filterFormat", browse.format)
+                .putBoolean("filterDownloaded", browse.downloaded).putInt("filterSort", browse.sort).apply();
+        savedListState = null; showSection(); recyclerView.scrollToPosition(0);
+    }
+
     private void request(Location target, boolean push) {
+        request(target, push, false);
+    }
+
+    private void request(Location target, boolean push, boolean refresh) {
+        boolean changedLocation = location.search != target.search || !Objects.equals(location.url, target.url)
+                || !Objects.equals(location.query, target.query);
         if (push) {
             if (history.size() == 30) history.remove(0);
             history.add(location);
@@ -490,23 +639,47 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         repository.cancel();
         final int viewId = viewGeneration;
         final boolean cacheOnly = offline;
+        final Context appContext = requireContext().getApplicationContext();
+        if (push || changedLocation) { page = null; savedListState = null; }
         busy = true; error = null;
-        updateStatus(); applyAdaptiveLayout();
+        showSection();
         requestFuture = network.submit(() -> {
             if (id != generation || viewId != viewGeneration) return;
             CatalogPage result = null; String failure = null;
             try {
-                result = target.search ? repository.search(target.query, cacheOnly) : repository.load(target.url, cacheOnly);
+                CatalogPage cached = null;
+                try {
+                    cached = target.search ? repository.cachedSearch(target.query)
+                            : target.url == null ? repository.cachedLanding() : repository.cached(target.url);
+                } catch (Exception ignored) { /* Cache misses continue to the bounded network request. */ }
+                if (cached != null) {
+                    final CatalogPage preview = cached;
+                    final boolean needsRefresh = !cacheOnly && (refresh || !repository.isFresh(cached));
+                    ui.post(() -> {
+                        if (id != generation || viewId != viewGeneration || root == null || !isAdded()) return;
+                        page = preview; busy = needsRefresh; showSection();
+                    });
+                    if (!needsRefresh) {
+                        if (!cacheOnly) CatalogWarmup.prefetchNext(appContext, cached);
+                        return;
+                    }
+                }
+                result = target.search ? repository.search(target.query, cacheOnly)
+                        : target.url == null ? repository.loadLanding(cacheOnly) : repository.load(target.url, cacheOnly);
             } catch (Exception e) {
                 failure = cacheOnly ? "cache" : "network";
             }
+            if (result != null && !cacheOnly) CatalogWarmup.prefetchNext(appContext, result);
             final CatalogPage loaded = result;
             final String failed = failure;
             ui.post(() -> {
                 if (id != generation || viewId != viewGeneration || root == null || !isAdded()) return;
                 busy = false;
                 error = failed;
-                if (loaded != null) page = loaded;
+                if (loaded != null) {
+                    if (page != null) saveScroll();
+                    page = loaded;
+                }
                 showSection();
             });
         });
@@ -522,6 +695,8 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     private void showSection() {
         if (root == null) return;
         adapter.refresh();
+        filtersButton.setText(getString(R.string.filter) + (browse.active() || browse.sort != 0 ? " •" : ""));
+        viewButton.setText(getString(listMode ? R.string.grid : R.string.list));
         pageTitle.setText(CATALOG.equals(section) && page != null ? page.title
                 : getString(LOCAL.equals(section) ? R.string.library : DOWNLOADS.equals(section) ? R.string.downloads : R.string.catalog_tab_title));
         previous.setVisibility(selected != null || !history.isEmpty() || !CATALOG.equals(section) ? View.VISIBLE : View.GONE);
@@ -541,7 +716,7 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         if (CATALOG.equals(section)) {
             if (error != null) message = getString("cache".equals(error) ? R.string.catalog_no_cached_page : R.string.loading_error);
             else if (page != null && page.fromCache) {
-                message = getString(R.string.catalog_offline);
+                message = getString(offline ? R.string.catalog_offline : R.string.catalog_saved_results);
                 if (page.fetchedAt > 0) message += " · " + DateFormat.getDateFormat(requireContext()).format(new Date(page.fetchedAt));
             } else if (offline) message = getString(R.string.catalog_offline_mode);
         }
@@ -720,10 +895,12 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
                     if (index == labels.size() - 1) {
                         offline = !offline; preferences.edit().putBoolean("offline", offline).apply();
                     } else {
+                        CatalogWarmup.cancel(requireContext());
                         repository.setMirror(index == 0 ? null : CatalogRepository.MIRRORS[index - 1]);
                         offline = false; preferences.edit().putBoolean("offline", false).apply();
                     }
-                    request(location, false);
+                    if (offline) CatalogWarmup.cancel(requireContext()); else CatalogWarmup.schedule(requireContext());
+                    request(location, false, !offline);
                 }).setNegativeButton(R.string.close, null).show();
     }
 
@@ -809,7 +986,7 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     }
 
     @Override public void onResume() {
-        super.onResume(); resumed = true; updateStatusIcons(getUserVisibleHint()); pollTasks();
+        super.onResume(); resumed = true; updateStatusIcons(getUserVisibleHint()); startVisibleRequest(); pollTasks();
     }
     @Override public void onPause() {
         resumed = false; updateStatusIcons(false); ui.removeCallbacks(poll); super.onPause();
@@ -817,14 +994,20 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     @Override public void setUserVisibleHint(boolean visible) {
         super.setUserVisibleHint(visible);
         updateStatusIcons(visible && resumed);
-        if (visible) pollTasks(); else ui.removeCallbacks(poll);
+        if (visible) { startVisibleRequest(); pollTasks(); } else ui.removeCallbacks(poll);
+    }
+    private void startVisibleRequest() {
+        if (root == null || !resumed || !getUserVisibleHint()) return;
+        if (!initialRequestStarted || (!busy && page != null && !offline && !CatalogRepository.isFresh(page))) {
+            initialRequestStarted = true; request(location, false);
+        }
     }
     @Override public void onDestroyView() {
         updateStatusIcons(false);
         saveScroll();
         if (search != null) searchDraft = search.getText().toString();
         if (detailScroll != null) savedDetailScroll = detailScroll.getScrollY();
-        viewGeneration++; generation++; busy = false;
+        viewGeneration++; generation++; busy = false; initialRequestStarted = false;
         if (requestFuture != null) requestFuture.cancel(true);
         repository.cancel();
         ui.removeCallbacks(poll);
@@ -855,7 +1038,7 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         private final List<CatalogDownloads.Task> downloadRows = new ArrayList<>();
         void refresh() {
             entries.clear(); downloadRows.clear();
-            if (CATALOG.equals(section)) { if (page != null) entries.addAll(page.entries); }
+            if (CATALOG.equals(section)) { if (page != null) entries.addAll(browse.apply(page.entries, completed.keySet(), Locale.getDefault())); }
             else if (LOCAL.equals(section)) {
                 Set<String> shown = new HashSet<>();
                 for (CatalogDownloads.Task task : tasks) {
@@ -891,7 +1074,8 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
             card.removeAllViews(); card.setBackgroundColor(Color.TRANSPARENT);
             card.setOnClickListener(null); card.setFocusable(false); card.setClickable(false);
             if (getItemViewType(position) == 3) {
-                TextView empty = text(getString(busy && CATALOG.equals(section) ? R.string.please_wait : R.string.empy), 18, muted);
+                TextView empty = text(getString(busy && CATALOG.equals(section) ? R.string.please_wait : R.string.empy)
+                        + (CATALOG.equals(section) && browse.active() ? "\n" + getString(R.string.catalog_filter_scope) : ""), 18, muted);
                 empty.setGravity(Gravity.CENTER); empty.setPadding(dp(16), dp(40), dp(16), dp(40));
                 card.addView(empty, matchWrap()); return;
             }

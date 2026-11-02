@@ -728,4 +728,6 @@
    <string name="catalog_queued">Στην ουρά</string>
    <string name="catalog_no_selection">Επιλέξτε βιβλίο για να δείτε λεπτομέρειες</string>
    <string name="catalog_tab_title">Κατάλογος</string>
+   <string name="catalog_saved_results">Αποθηκευμένα αποτελέσματα</string>
+   <string name="catalog_filter_scope">Τα φίλτρα εφαρμόζονται στα βιβλία που έχουν φορτωθεί</string>
 </resources>

@@ -728,4 +728,6 @@
    <string name="catalog_queued">In coda</string>
    <string name="catalog_no_selection">Scegli un libro per vedere i dettagli</string>
    <string name="catalog_tab_title">Catalogo</string>
+   <string name="catalog_saved_results">Risultati salvati</string>
+   <string name="catalog_filter_scope">I filtri si applicano ai libri caricati</string>
 </resources>
