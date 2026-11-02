@@ -102,6 +102,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
     private int mTabViewTextViewId;
 
     private ViewPager mViewPager;
+    private boolean pendingSelectionScroll = true;
     private ViewPager.OnPageChangeListener mViewPagerPageChangeListener;
 
     public SlidingTabLayout(Context context) {
@@ -186,7 +187,20 @@ public class SlidingTabLayout extends HorizontalScrollView {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        pendingSelectionScroll = true;
         applyFloatingRadius(h);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (pendingSelectionScroll && mViewPager != null && getWidth() > 0) {
+            // Selection can arrive before the tabs have a position. Reveal it after
+            // measurement, and again after rotation, without fighting manual scrolling.
+            pendingSelectionScroll = false;
+            updateIcons(mViewPager.getCurrentItem());
+            scrollToTab(mViewPager.getCurrentItem(), 0);
+        }
     }
 
     /**
@@ -428,6 +442,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
         getmTabStrip().removeAllViews();
 
         mViewPager = viewPager;
+        pendingSelectionScroll = true;
         if (viewPager != null) {
             viewPager.addOnPageChangeListener(new InternalViewPagerListener());
             populateTabStrip();
@@ -611,13 +626,14 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
             }
         }
-        updateIcons(0);
+        updateIcons(mViewPager.getCurrentItem());
 
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        pendingSelectionScroll = true;
 
         if (mViewPager != null) {
             scrollToTab(mViewPager.getCurrentItem(), 0);
@@ -633,6 +649,10 @@ public class SlidingTabLayout extends HorizontalScrollView {
         TextView selectedChild = (TextView) getmTabStrip().getChildAt(tabIndex);
 
         if (selectedChild != null) {
+            if (getWidth() <= 0 || selectedChild.getWidth() <= 0) {
+                pendingSelectionScroll = true;
+                return;
+            }
             int targetScrollX = selectedChild.getLeft() + positionOffset;
 
             if (tabIndex > 0 || positionOffset > 0) {

@@ -20,6 +20,22 @@ public class CatalogLayoutPolicyTest {
         assertEquals(1, CatalogLayoutPolicy.columns(288, 1f));
     }
 
+    @Test public void phoneLandscapeReservesHeightForTheShelf() {
+        assertFalse(CatalogLayoutPolicy.isTwoPane(900, 280, 1f));
+        assertTrue(CatalogLayoutPolicy.isTwoPane(1280, 680, 1f));
+    }
+
+    @Test public void compactLandscapeRowsLeaveRoomForTheBookTitle() {
+        assertEquals(2, CatalogLayoutPolicy.compactColumns(740, 1.15f));
+        assertEquals(1, CatalogLayoutPolicy.compactColumns(740, 2f));
+        assertEquals(1, CatalogLayoutPolicy.compactColumns(500, 1.15f));
+    }
+
+    @Test public void normalPhoneTextKeepsTwoColumnsButAccessibilityTextReflows() {
+        assertEquals(2, CatalogLayoutPolicy.columns(352, 1.15f));
+        assertEquals(1, CatalogLayoutPolicy.columns(352, 2f));
+    }
+
     @Test public void largeTextGetsFewerColumnsAndMoreReadingRoom() {
         assertFalse(CatalogLayoutPolicy.isTwoPane(960, 2f));
         assertTrue(CatalogLayoutPolicy.isTwoPane(1280, 2f));

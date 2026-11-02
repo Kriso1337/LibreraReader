@@ -9,6 +9,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Drawable;
@@ -34,6 +35,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -46,6 +48,7 @@ import androidx.core.util.Pair;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -95,6 +98,10 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     private CatalogDownloads downloads;
     private SharedPreferences preferences;
     private LinearLayout root, header, body, master, detailBox, statusBox;
+    private LinearLayout normalTop, searchRow, compactRow, masterHeading;
+    private HorizontalScrollView sectionStrip;
+    private View sectionGap, searchGap;
+    private Button compactSearchMenu, statusRetry;
     private ScrollView detailScroll;
     private EditText search;
     private TextView pageTitle, statusText, detailStatus;
@@ -111,9 +118,9 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     private Location location = new Location(null, "", false);
     private String section = CATALOG, treeUri, searchDraft = "", error;
     private boolean offline, busy, dualPane, resumed, polling, rebuilding;
-    private boolean ownsStatusIcons, previousLightStatusIcons;
+    private boolean ownsStatusIcons, previousLightStatusIcons, imeVisible, compactHeader, compactBooks, bookRefreshPosted;
     private volatile int generation, viewGeneration;
-    private int detailWidth, lastLayoutWidth, savedDetailScroll;
+    private int detailWidth, lastLayoutWidth, lastLayoutHeight, savedDetailScroll, bookLayoutWidth;
     private Parcelable savedListState;
     private int paper, surface, ink, muted, accent, onAccent, line;
 
@@ -161,8 +168,8 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         body.setOrientation(LinearLayout.HORIZONTAL);
         root.addView(body, new LinearLayout.LayoutParams(-1, 0, 1));
         root.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
-            if (r - l != lastLayoutWidth && r > l) {
-                lastLayoutWidth = r - l;
+            if ((r - l != lastLayoutWidth || b - t != lastLayoutHeight) && r > l) {
+                lastLayoutWidth = r - l; lastLayoutHeight = b - t;
                 applyAdaptiveLayout();
             }
         });
@@ -185,17 +192,36 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     private void fitAroundChrome(View attached) {
         if (root == null || getActivity() == null) return;
         updateStatusIcons(resumed && getUserVisibleHint());
-        Insets safe = DocumentController.keptClearOf(getActivity(), ViewCompat.getRootWindowInsets(attached));
+        WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(attached);
+        Insets safe = DocumentController.keptClearOf(getActivity(), insets);
+        if (insets != null) safe = Insets.max(safe, insets.getInsets(WindowInsetsCompat.Type.displayCutout()));
+        boolean keyboard = insets != null && insets.isVisible(WindowInsetsCompat.Type.ime());
+        boolean keyboardChanged = imeVisible != keyboard;
+        imeVisible = keyboard;
         View topTabs = getActivity().findViewById(R.id.imageParent1);
         int top = SlidingTabLayout.isFloating() ? safe.top : topTabs == null ? safe.top : topTabs.getHeight();
         int left = dp(16) + safe.left, right = dp(16) + safe.right;
         int bottom = dp(8) + safe.bottom + SlidingTabLayout.floatingSpace();
+        if (imeVisible) {
+            // The visible frame handles both edge-to-edge IME overlays and an already
+            // resized window. Counting the entire IME inset twice would erase the list.
+            Rect visible = new Rect(); attached.getWindowVisibleDisplayFrame(visible);
+            int[] at = new int[2]; attached.getLocationOnScreen(at);
+            int overlap = Math.max(0, at[1] + attached.getHeight() - visible.bottom);
+            View tabs = getActivity().findViewById(R.id.slidingTabs2);
+            int floating = 0;
+            if (SlidingTabLayout.isFloating() && tabs != null && tabs.isShown()) {
+                int[] tabAt = new int[2]; tabs.getLocationOnScreen(tabAt);
+                if (tabAt[1] + tabs.getHeight() <= visible.bottom + 1) floating = SlidingTabLayout.floatingSpace();
+            }
+            bottom = dp(8) + Math.max(safe.bottom, overlap) + floating;
+        }
         top += dp(12);
         if (root.getPaddingLeft() != left || root.getPaddingTop() != top
                 || root.getPaddingRight() != right || root.getPaddingBottom() != bottom) {
             root.setPadding(left, top, right, bottom);
             applyAdaptiveLayout();
-        }
+        } else if (keyboardChanged) applyAdaptiveLayout();
     }
 
     private void updateStatusIcons(boolean visible) {
@@ -228,7 +254,7 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
 
     private void createHeader() {
         header.removeAllViews();
-        LinearLayout top = row();
+        LinearLayout top = normalTop = row();
         TextView brand = text("Flibusta", 28, ink);
         brand.setTypeface(Typeface.create("serif", Typeface.NORMAL));
         top.addView(brand, new LinearLayout.LayoutParams(0, -2, 1));
@@ -236,16 +262,46 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         top.addView(sourceButton, wrapWrap());
         header.addView(top, matchWrap());
         LinearLayout sections = row();
+        Button selectedSection = null;
         for (String name : new String[]{CATALOG, LOCAL, DOWNLOADS}) {
             int label = name.equals(CATALOG) ? R.string.catalog_tab_title : name.equals(LOCAL) ? R.string.library : R.string.downloads;
             Button item = button(getString(label), section.equals(name), v -> switchSection(name));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, -2, 1);
-            params.setMarginEnd(dp(4));
+            item.setSingleLine(true); item.setEllipsize(null);
+            item.setPadding(dp(10), dp(10), dp(10), dp(10));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-2, -2, 1);
+            if (!DOWNLOADS.equals(name)) params.setMarginEnd(dp(8));
             sections.addView(item, params);
+            if (section.equals(name)) selectedSection = item;
         }
-        space(header, 8); header.addView(sections, matchWrap());
+        sectionGap = new View(requireContext()); header.addView(sectionGap, new LinearLayout.LayoutParams(1, dp(8)));
+        sectionStrip = new HorizontalScrollView(requireContext());
+        sectionStrip.setHorizontalScrollBarEnabled(false); sectionStrip.setFillViewport(true);
+        sectionStrip.addView(sections, new HorizontalScrollView.LayoutParams(-2, -2));
+        header.addView(sectionStrip, matchWrap());
+        final HorizontalScrollView strip = sectionStrip;
+        final Button activeSection = selectedSection;
+        strip.addOnLayoutChangeListener((view, l, t, r, b, oldL, oldT, oldR, oldB) -> {
+            // A posted callback can run before the first measure, when every right edge
+            // is still zero. The selected segment must remain visible after rotation too.
+            if (r > l && activeSection != null && activeSection.getWidth() > 0) {
+                strip.scrollTo(Math.max(0, activeSection.getRight() - strip.getWidth()), 0);
+            }
+        });
+        compactRow = row();
+        Button compactMenu = button(sectionLabel() + " ▾", false, v -> chooseSection());
+        compactMenu.setSingleLine(true);
+        compactRow.addView(compactMenu, new LinearLayout.LayoutParams(0, -2, 1));
+        Button compactSource = button(getString(R.string.server), false, v -> chooseSource());
+        LinearLayout.LayoutParams compactSourceParams = wrapWrap(); compactSourceParams.setMarginStart(dp(8));
+        compactRow.addView(compactSource, compactSourceParams);
+        header.addView(compactRow, matchWrap()); compactRow.setVisibility(View.GONE);
+        searchGap = null; searchRow = null; compactSearchMenu = null;
         if (CATALOG.equals(section)) {
-            LinearLayout searchRow = row();
+            searchRow = row();
+            compactSearchMenu = button(sectionLabel() + " ▾", false, v -> chooseSection());
+            compactSearchMenu.setSingleLine(true); compactSearchMenu.setVisibility(View.GONE);
+            LinearLayout.LayoutParams menuParams = wrapWrap(); menuParams.setMarginEnd(dp(8));
+            searchRow.addView(compactSearchMenu, menuParams);
             search = new EditText(requireContext());
             search.setTextSize(16); search.setTextColor(ink); search.setHintTextColor(muted);
             search.setHint(R.string.search_in_the_library);
@@ -262,7 +318,8 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
             Button go = button(getString(R.string.search), false, v -> submitSearch());
             LinearLayout.LayoutParams gp = wrapWrap(); gp.setMarginStart(dp(6));
             searchRow.addView(go, gp);
-            space(header, 12); header.addView(searchRow, matchWrap());
+            searchGap = new View(requireContext()); header.addView(searchGap, new LinearLayout.LayoutParams(1, dp(12)));
+            header.addView(searchRow, matchWrap());
         } else search = null;
         loading = new ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal);
         loading.setIndeterminate(true); loading.setIndeterminateTintList(ColorStateList.valueOf(accent));
@@ -273,7 +330,7 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
     private void createBody() {
         body.removeAllViews();
         master = column();
-        LinearLayout heading = row();
+        LinearLayout heading = masterHeading = row();
         previous = button(getString(R.string.back), false, v -> onBackAction());
         heading.addView(previous, wrapWrap());
         pageTitle = text("", 18, ink);
@@ -287,10 +344,8 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         statusText = text("", 14, muted);
         statusText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         statusBox.addView(statusText, matchWrap());
-        statusBox.addView(button(getString(R.string.try_again), false, v -> {
-            offline = false; preferences.edit().putBoolean("offline", false).apply();
-            request(location, false);
-        }), wrapWrap());
+        statusRetry = button(getString(R.string.try_again), false, v -> retryPage());
+        statusBox.addView(statusRetry, wrapWrap());
         master.addView(statusBox, matchWrap());
         recyclerView = new RecyclerView(requireContext());
         recyclerView.setClipToPadding(false);
@@ -324,7 +379,10 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         rebuilding = true;
         float available = (root.getWidth() - root.getPaddingLeft() - root.getPaddingRight()) / density();
         if (available <= 0) available = getResources().getConfiguration().screenWidthDp - 32;
-        dualPane = CatalogLayoutPolicy.isTwoPane(available, getResources().getConfiguration().fontScale);
+        float availableHeight = (root.getHeight() - root.getPaddingTop() - root.getPaddingBottom()) / density();
+        if (root.getHeight() <= 0) availableHeight = getResources().getConfiguration().screenHeightDp - 100;
+        compactHeader = availableHeight < 440;
+        dualPane = CatalogLayoutPolicy.isTwoPane(available, availableHeight, getResources().getConfiguration().fontScale);
         detailWidth = CatalogLayoutPolicy.detailWidth(available);
         boolean showDetail = selected != null || (dualPane && !DOWNLOADS.equals(section));
         master.setVisibility(!dualPane && selected != null ? View.GONE : View.VISIBLE);
@@ -332,9 +390,82 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         LinearLayout.LayoutParams dp = new LinearLayout.LayoutParams(dualPane ? dp(detailWidth) : 0, -1, dualPane ? 0 : 1);
         dp.setMarginStart(dualPane ? dp(20) : 0); detailScroll.setLayoutParams(dp);
         float listWidth = dualPane ? available - detailWidth - 20 : available;
-        int columns = CatalogLayoutPolicy.columns(listWidth, getResources().getConfiguration().fontScale);
+        boolean previousCompactBooks = compactBooks;
+        // A language-specific Configuration can retain its original orientation.
+        // The measured window, including split-screen, is the layout authority.
+        compactBooks = compactHeader && !dualPane && !imeVisible && available > availableHeight;
+        int columns = compactBooks ? CatalogLayoutPolicy.compactColumns(listWidth, getResources().getConfiguration().fontScale)
+                : CatalogLayoutPolicy.columns(listWidth, getResources().getConfiguration().fontScale);
+        int width = Math.round(listWidth * density());
+        boolean changedBooks = previousCompactBooks != compactBooks || bookLayoutWidth != width
+                || layout.getSpanCount() != columns;
+        bookLayoutWidth = width;
         if (layout.getSpanCount() != columns) layout.setSpanCount(columns);
+        if (changedBooks) rebindBooksAfterLayout();
+        boolean singleDetail = selected != null && !dualPane;
+        boolean fullHeader = !compactHeader && !imeVisible && !singleDetail;
+        normalTop.setVisibility(fullHeader ? View.VISIBLE : View.GONE);
+        sectionStrip.setVisibility(!compactHeader && !imeVisible ? View.VISIBLE : View.GONE);
+        sectionGap.setVisibility(fullHeader ? View.VISIBLE : View.GONE);
+        boolean showSearch = CATALOG.equals(section) && !singleDetail;
+        if (searchRow != null) searchRow.setVisibility(showSearch ? View.VISIBLE : View.GONE);
+        if (searchGap != null) searchGap.setVisibility(fullHeader && showSearch ? View.VISIBLE : View.GONE);
+        if (compactSearchMenu != null) compactSearchMenu.setVisibility(compactHeader && !imeVisible ? View.VISIBLE : View.GONE);
+        compactRow.setVisibility(compactHeader && !imeVisible && !showSearch ? View.VISIBLE : View.GONE);
+        masterHeading.setVisibility(compactHeader || imeVisible ? View.GONE : View.VISIBLE);
+        statusRetry.setVisibility(compactHeader || imeVisible ? View.GONE : View.VISIBLE);
+        statusText.setMaxLines(compactHeader || imeVisible ? 1 : Integer.MAX_VALUE);
+        statusText.setEllipsize(compactHeader || imeVisible ? TextUtils.TruncateAt.END : null);
+        next.setVisibility(!compactHeader && !imeVisible && CATALOG.equals(section) && page != null && !empty(page.nextUrl) ? View.VISIBLE : View.GONE);
         rebuilding = false;
+    }
+
+    private void rebindBooksAfterLayout() {
+        if (bookRefreshPosted || recyclerView == null || layout == null || adapter == null) return;
+        bookRefreshPosted = true;
+        final RecyclerView target = recyclerView;
+        final GridLayoutManager manager = layout;
+        final Parcelable position = manager.onSaveInstanceState();
+        final int request = generation;
+        target.post(() -> {
+            if (recyclerView != target || root == null || adapter == null) return;
+            bookRefreshPosted = false;
+            adapter.notifyDataSetChanged();
+            if (generation == request) manager.onRestoreInstanceState(position);
+        });
+    }
+
+    private String sectionLabel() {
+        return getString(LOCAL.equals(section) ? R.string.library : DOWNLOADS.equals(section) ? R.string.downloads : R.string.catalog_tab_title);
+    }
+
+    private void retryPage() {
+        offline = false; preferences.edit().putBoolean("offline", false).apply();
+        request(location, false);
+    }
+
+    /** Compact windows retain every navigation action without spending three fixed rows. */
+    private void chooseSection() {
+        ArrayList<String> labels = new ArrayList<>();
+        ArrayList<Runnable> actions = new ArrayList<>();
+        for (String name : new String[]{CATALOG, LOCAL, DOWNLOADS}) {
+            labels.add(getString(CATALOG.equals(name) ? R.string.catalog_tab_title : LOCAL.equals(name) ? R.string.library : R.string.downloads));
+            actions.add(() -> switchSection(name));
+        }
+        if (selected != null || !history.isEmpty()) {
+            labels.add(getString(R.string.back)); actions.add(this::onBackAction);
+        }
+        if (CATALOG.equals(section)) {
+            labels.add(getString(R.string.try_again)); actions.add(this::retryPage);
+            if (page != null && !empty(page.nextUrl)) {
+                labels.add(getString(R.string.next_page));
+                actions.add(() -> request(new Location(page.nextUrl, location.query, false), true));
+            }
+        }
+        labels.add(getString(R.string.server)); actions.add(this::chooseSource);
+        new AlertDialog.Builder(requireContext()).setTitle(sectionLabel())
+                .setItems(labels.toArray(new String[0]), (dialog, index) -> actions.get(index).run())
+                .setNegativeButton(R.string.close, null).show();
     }
 
     private void submitSearch() {
@@ -699,7 +830,7 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         ui.removeCallbacks(poll);
         root = null; header = null; body = null; detailBox = null; detailScroll = null;
         if (recyclerView != null) recyclerView.setAdapter(null);
-        recyclerView = null; adapter = null; layout = null;
+        recyclerView = null; adapter = null; layout = null; bookRefreshPosted = false; bookLayoutWidth = 0;
         super.onDestroyView();
     }
     @Override public void onDestroy() {
@@ -750,7 +881,9 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         @NonNull @Override public ShelfHolder onCreateViewHolder(@NonNull ViewGroup parent, int type) {
             LinearLayout container = column();
             container.setPadding(dp(7), dp(10), dp(7), dp(14));
-            container.setLayoutParams(new RecyclerView.LayoutParams(-1, -2));
+            RecyclerView.LayoutParams itemParams = new RecyclerView.LayoutParams(-1, -2);
+            if (type == 2) itemParams.bottomMargin = dp(12);
+            container.setLayoutParams(itemParams);
             return new ShelfHolder(container);
         }
         @Override public void onBindViewHolder(@NonNull ShelfHolder holder, int position) {
@@ -765,25 +898,38 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
             if (getItemViewType(position) == 2) { bindTask(card, downloadRows.get(position)); return; }
             CatalogEntry entry = entries.get(position);
             if (isBook(position)) {
-                // Book jackets keep their proportions, even in a wide tablet column.
-                int cellWidth = recyclerView.getWidth() / Math.max(1, layout.getSpanCount()) - dp(14);
-                int jacketWidth = Math.min(dp(156), Math.max(dp(110), cellWidth));
-                int jacketHeight = Math.round(jacketWidth * 1.4f);
-                FrameLayout jacketHolder = new FrameLayout(requireContext());
-                FrameLayout.LayoutParams jacketParams = new FrameLayout.LayoutParams(jacketWidth, jacketHeight);
-                jacketParams.gravity = Gravity.CENTER_HORIZONTAL;
-                jacketHolder.addView(cover(entry, 178), jacketParams);
-                card.addView(jacketHolder, new LinearLayout.LayoutParams(-1, jacketHeight));
+                LinearLayout labels = card;
+                if (compactBooks) {
+                    // A short landscape window should show identifiable books, not
+                    // only the top half of a full-height jacket.
+                    LinearLayout compact = row(); compact.setGravity(Gravity.TOP);
+                    LinearLayout.LayoutParams coverParams = new LinearLayout.LayoutParams(dp(60), dp(84));
+                    coverParams.setMarginEnd(dp(12));
+                    compact.addView(cover(entry, 84), coverParams);
+                    labels = column();
+                    compact.addView(labels, new LinearLayout.LayoutParams(0, -2, 1));
+                    card.addView(compact, matchWrap());
+                } else {
+                    // Book jackets keep their proportions in portrait and on tablets.
+                    int cellWidth = recyclerView.getWidth() / Math.max(1, layout.getSpanCount()) - dp(14);
+                    int jacketWidth = Math.min(dp(156), Math.max(dp(110), cellWidth));
+                    int jacketHeight = Math.round(jacketWidth * 1.4f);
+                    FrameLayout jacketHolder = new FrameLayout(requireContext());
+                    FrameLayout.LayoutParams jacketParams = new FrameLayout.LayoutParams(jacketWidth, jacketHeight);
+                    jacketParams.gravity = Gravity.CENTER_HORIZONTAL;
+                    jacketHolder.addView(cover(entry, 178), jacketParams);
+                    card.addView(jacketHolder, new LinearLayout.LayoutParams(-1, jacketHeight));
+                }
                 TextView title = text(entry.title, 16, ink);
-                title.setTypeface(Typeface.DEFAULT, Typeface.BOLD); title.setPadding(0, dp(12), 0, dp(4));
-                title.setMaxLines(3); title.setEllipsize(TextUtils.TruncateAt.END);
-                card.addView(title, matchWrap());
+                title.setTypeface(Typeface.DEFAULT, Typeface.BOLD); title.setPadding(0, compactBooks ? 0 : dp(12), 0, dp(4));
+                title.setMaxLines(compactBooks ? 2 : 3); title.setEllipsize(TextUtils.TruncateAt.END);
+                labels.addView(title, matchWrap());
                 TextView author = text(entry.author, 14, muted);
                 author.setMaxLines(2); author.setEllipsize(TextUtils.TruncateAt.END);
-                card.addView(author, matchWrap());
+                labels.addView(author, matchWrap());
                 if (completed.containsKey(entry.id)) {
                     TextView saved = text(getString(R.string.catalog_on_device), 12, accent);
-                    saved.setPadding(0, dp(6), 0, 0); card.addView(saved, matchWrap());
+                    saved.setPadding(0, dp(6), 0, 0); labels.addView(saved, matchWrap());
                 }
                 card.setContentDescription(entry.title + ", " + entry.author
                         + (completed.containsKey(entry.id) ? ", " + getString(R.string.catalog_on_device) : ""));
@@ -813,12 +959,18 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
                 progress.setProgressTintList(ColorStateList.valueOf(accent)); progress.setIndeterminate(task.total <= 0);
                 if (task.total > 0) progress.setProgress((int) Math.min(100, task.bytes * 100L / task.total));
                 box.addView(progress, new LinearLayout.LayoutParams(-1, dp(6)));
+                space(box, 12);
             }
             Button action = button(getString(done ? R.string.read_a_book : failed ? R.string.try_again : R.string.cancel), done, v -> {
                 if (done) openTask(task); else taskAction(task, failed);
             });
+            action.setEnabled(!failed || !offline);
+            action.setAlpha(action.isEnabled() ? 1f : .45f);
             box.addView(action, matchWrap());
-            if (failed) box.addView(button(getString(R.string.folder), false, v -> chooseFolder()), matchWrap());
+            if (failed) {
+                space(box, 8);
+                box.addView(button(getString(R.string.folder), false, v -> chooseFolder()), matchWrap());
+            }
         }
     }
 
@@ -832,36 +984,48 @@ public class CatalogFragment extends UIFragment<CatalogEntry> {
         int[] colors = {Color.rgb(41, 73, 56), Color.rgb(78, 93, 88), Color.rgb(112, 77, 57), Color.rgb(68, 79, 105)};
         int color = colors[(book.title == null ? 0 : (book.title.hashCode() & Integer.MAX_VALUE)) % colors.length];
         frame.setBackground(shape(color, 9, color)); frame.setClipToOutline(true);
-        LinearLayout fallback = column(); fallback.setPadding(dp(16), dp(18), dp(14), dp(14));
-        TextView author = text(book.author, 12, Color.rgb(233, 231, 214));
-        // This is decorative jacket artwork, like a downloaded cover image. Full
-        // accessible title/author below the jacket keep the user's font scale.
-        author.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
-        author.setMaxLines(2); author.setEllipsize(TextUtils.TruncateAt.END);
-        fallback.addView(author, matchWrap());
-        String jacketTitle = book.title == null ? "" : book.title.split(":", 2)[0];
-        TextView title = text(jacketTitle, 22, Color.rgb(249, 244, 223));
-        title.setTypeface(Typeface.create("serif", Typeface.NORMAL));
-        title.setMaxLines(5); title.setEllipsize(TextUtils.TruncateAt.END);
-        title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
-        if (Build.VERSION.SDK_INT >= 23) {
-            title.setBreakStrategy(android.text.Layout.BREAK_STRATEGY_SIMPLE);
-            title.setHyphenationFrequency(android.text.Layout.HYPHENATION_FREQUENCY_NONE);
+        final View fallback;
+        if (height < 100) {
+            String title = book.title == null ? "" : book.title.trim();
+            int initial = title.codePoints().filter(Character::isLetterOrDigit).findFirst().orElse('?');
+            TextView monogram = text(new String(Character.toChars(initial)).toUpperCase(java.util.Locale.ROOT), 28,
+                    Color.rgb(249, 244, 223));
+            monogram.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 28);
+            monogram.setTypeface(Typeface.create("serif", Typeface.NORMAL)); monogram.setGravity(Gravity.CENTER);
+            fallback = monogram;
+        } else {
+            LinearLayout jacket = column(); jacket.setPadding(dp(16), dp(18), dp(14), dp(14));
+            TextView author = text(book.author, 12, Color.rgb(233, 231, 214));
+            // This is decorative jacket artwork, like a downloaded cover image. Full
+            // accessible title/author below the jacket keep the user's font scale.
+            author.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+            author.setMaxLines(2); author.setEllipsize(TextUtils.TruncateAt.END);
+            jacket.addView(author, matchWrap());
+            String jacketTitle = book.title == null ? "" : book.title.split(":", 2)[0];
+            TextView title = text(jacketTitle, 22, Color.rgb(249, 244, 223));
+            title.setTypeface(Typeface.create("serif", Typeface.NORMAL));
+            title.setMaxLines(5); title.setEllipsize(TextUtils.TruncateAt.END);
+            title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
+            if (Build.VERSION.SDK_INT >= 23) {
+                title.setBreakStrategy(android.text.Layout.BREAK_STRATEGY_SIMPLE);
+                title.setHyphenationFrequency(android.text.Layout.HYPHENATION_FREQUENCY_NONE);
+            }
+            final int[] jacketTypeSize = {22};
+            title.addOnLayoutChangeListener((view, l, t, r, b, ol, ot, or, ob) -> {
+                if (r <= l) return;
+                Paint measure = new Paint(title.getPaint()); measure.setTextSize(dp(22));
+                float longest = 0;
+                for (String word : jacketTitle.split("\\s+")) longest = Math.max(longest, measure.measureText(word));
+                int width = r - l - title.getPaddingLeft() - title.getPaddingRight();
+                int maximum = Math.max(14, Math.min(22, (int) Math.floor(22f * Math.max(1, width - dp(2)) / Math.max(1, longest))));
+                if (jacketTypeSize[0] == maximum) return;
+                jacketTypeSize[0] = maximum;
+                title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, maximum);
+            });
+            title.setPadding(0, dp(14), 0, 0);
+            jacket.addView(title, new LinearLayout.LayoutParams(-1, 0, 1));
+            fallback = jacket;
         }
-        final int[] jacketTypeSize = {22};
-        title.addOnLayoutChangeListener((view, l, t, r, b, ol, ot, or, ob) -> {
-            if (r <= l) return;
-            Paint measure = new Paint(title.getPaint()); measure.setTextSize(dp(22));
-            float longest = 0;
-            for (String word : jacketTitle.split("\\s+")) longest = Math.max(longest, measure.measureText(word));
-            int width = r - l - title.getPaddingLeft() - title.getPaddingRight();
-            int maximum = Math.max(14, Math.min(22, (int) Math.floor(22f * Math.max(1, width - dp(2)) / Math.max(1, longest))));
-            if (jacketTypeSize[0] == maximum) return;
-            jacketTypeSize[0] = maximum;
-            title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, maximum);
-        });
-        title.setPadding(0, dp(14), 0, 0);
-        fallback.addView(title, new LinearLayout.LayoutParams(-1, 0, 1));
         frame.addView(fallback, new FrameLayout.LayoutParams(-1, -1));
         if (!empty(book.coverUrl)) {
             ImageView image = new ImageView(requireContext());
