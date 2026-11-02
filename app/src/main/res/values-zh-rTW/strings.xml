@@ -719,4 +719,13 @@
    <string name="update_librerax">請將 LibreraX 更新至最新版本，以便從 Librera 匯入。</string>
    <string name="reading_progress">閱讀進度</string>
    <string name="add_to_home_screen">新增至主畫面</string>
+   <string name="catalog_offline">離線 · 已儲存的結果</string>
+   <string name="catalog_offline_mode">離線模式</string>
+   <string name="catalog_no_cached_page">此頁面沒有已儲存的結果</string>
+   <string name="catalog_on_device">已存至裝置</string>
+   <string name="catalog_app_storage">應用程式儲存空間（解除安裝時刪除）</string>
+   <string name="catalog_waiting_network">等待網路</string>
+   <string name="catalog_queued">已加入佇列</string>
+   <string name="catalog_no_selection">選擇一本書查看詳細資料</string>
+   <string name="catalog_tab_title">目錄</string>
 </resources>

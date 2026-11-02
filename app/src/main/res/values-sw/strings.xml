@@ -719,4 +719,13 @@
    <string name="update_librerax">Sasisha LibreraX hadi toleo jipya zaidi ili kuleta kutoka Librera.</string>
    <string name="reading_progress">Maendeleo ya kusoma</string>
    <string name="add_to_home_screen">Ongeza kwenye skrini ya mwanzo</string>
+   <string name="catalog_offline">Bila mtandao · matokeo yaliyohifadhiwa</string>
+   <string name="catalog_offline_mode">Hali ya bila mtandao</string>
+   <string name="catalog_no_cached_page">Hakuna matokeo yaliyohifadhiwa kwa ukurasa huu</string>
+   <string name="catalog_on_device">Kwenye kifaa</string>
+   <string name="catalog_app_storage">Hifadhi ya programu (hufutwa programu ikiondolewa)</string>
+   <string name="catalog_waiting_network">Inasubiri mtandao</string>
+   <string name="catalog_queued">Kwenye foleni</string>
+   <string name="catalog_no_selection">Chagua kitabu ili kuona maelezo</string>
+   <string name="catalog_tab_title">Katalogi</string>
 </resources>

@@ -719,4 +719,13 @@
    <string name="update_librerax">برای وارد کردن از Librera، LibreraX را به آخرین نسخه به‌روز کنید.</string>
    <string name="reading_progress">پیشرفت مطالعه</string>
    <string name="add_to_home_screen">افزودن به صفحهٔ اصلی</string>
+   <string name="catalog_offline">آفلاین · نتایج ذخیره‌شده</string>
+   <string name="catalog_offline_mode">حالت آفلاین</string>
+   <string name="catalog_no_cached_page">برای این صفحه نتیجهٔ ذخیره‌شده‌ای نیست</string>
+   <string name="catalog_on_device">روی دستگاه</string>
+   <string name="catalog_app_storage">فضای برنامه (با حذف برنامه پاک می‌شود)</string>
+   <string name="catalog_waiting_network">در انتظار شبکه</string>
+   <string name="catalog_queued">در صف</string>
+   <string name="catalog_no_selection">برای دیدن جزئیات یک کتاب انتخاب کنید</string>
+   <string name="catalog_tab_title">فهرست</string>
 </resources>

@@ -719,4 +719,13 @@
    <string name="update_librerax">Actualitza LibreraX a la darrera versió per importar des de Librera.</string>
    <string name="reading_progress">Progrés de lectura</string>
    <string name="add_to_home_screen">Afegeix a la pantalla d\'inici</string>
+   <string name="catalog_offline">Sense connexió · resultats desats</string>
+   <string name="catalog_offline_mode">Mode sense connexió</string>
+   <string name="catalog_no_cached_page">No hi ha resultats desats per a aquesta pàgina</string>
+   <string name="catalog_on_device">Al dispositiu</string>
+   <string name="catalog_app_storage">Emmagatzematge de l\'aplicació (s\'elimina en desinstal·lar-la)</string>
+   <string name="catalog_waiting_network">Esperant la xarxa</string>
+   <string name="catalog_queued">A la cua</string>
+   <string name="catalog_no_selection">Trieu un llibre per veure\'n els detalls</string>
+   <string name="catalog_tab_title">Catàleg</string>
 </resources>

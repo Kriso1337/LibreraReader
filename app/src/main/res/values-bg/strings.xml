@@ -719,4 +719,13 @@
    <string name="update_librerax">Обновете LibreraX до последната версия, за да импортирате от Librera.</string>
    <string name="reading_progress">Напредък в четенето</string>
    <string name="add_to_home_screen">Добавяне към началния екран</string>
+   <string name="catalog_offline">Офлайн · запазени резултати</string>
+   <string name="catalog_offline_mode">Офлайн режим</string>
+   <string name="catalog_no_cached_page">Няма запазени резултати за тази страница</string>
+   <string name="catalog_on_device">На устройството</string>
+   <string name="catalog_app_storage">Хранилище на приложението (изтрива се при деинсталиране)</string>
+   <string name="catalog_waiting_network">Изчакване на мрежа</string>
+   <string name="catalog_queued">На опашка</string>
+   <string name="catalog_no_selection">Изберете книга, за да видите подробностите</string>
+   <string name="catalog_tab_title">Каталог</string>
 </resources>

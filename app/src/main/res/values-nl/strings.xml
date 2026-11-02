@@ -719,4 +719,13 @@
    <string name="update_librerax">Werk LibreraX bij naar de nieuwste versie om vanuit Librera te importeren.</string>
    <string name="reading_progress">Leesvoortgang</string>
    <string name="add_to_home_screen">Toevoegen aan startscherm</string>
+   <string name="catalog_offline">Offline · opgeslagen resultaten</string>
+   <string name="catalog_offline_mode">Offlinemodus</string>
+   <string name="catalog_no_cached_page">Geen opgeslagen resultaten voor deze pagina</string>
+   <string name="catalog_on_device">Op het apparaat</string>
+   <string name="catalog_app_storage">Appopslag (verwijderd bij de-installatie)</string>
+   <string name="catalog_waiting_network">Wachten op netwerk</string>
+   <string name="catalog_queued">In wachtrij</string>
+   <string name="catalog_no_selection">Kies een boek om de details te bekijken</string>
+   <string name="catalog_tab_title">Catalogus</string>
 </resources>

@@ -720,6 +720,7 @@ public class MainTabs2 extends AdsFragmentActivity {
             LOG.e(e);
             Toast.makeText(MainTabs2.this, R.string.msg_unexpected_error, Toast.LENGTH_LONG).show();
             tabFragments.add(new SearchFragment2());
+            tabFragments.add(new com.foobnix.ui2.fragment.CatalogFragment());
             tabFragments.add(new BrowseFragment2());
             tabFragments.add(new RecentFragment2());
             tabFragments.add(new BookmarksFragment2());

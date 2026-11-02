@@ -719,4 +719,13 @@
    <string name="update_librerax">Aktualizujte LibreraX na nejnovější verzi, abyste mohli importovat z Librera.</string>
    <string name="reading_progress">Postup čtení</string>
    <string name="add_to_home_screen">Přidat na plochu</string>
+   <string name="catalog_offline">Offline · uložené výsledky</string>
+   <string name="catalog_offline_mode">Režim offline</string>
+   <string name="catalog_no_cached_page">Pro tuto stránku nejsou uložené výsledky</string>
+   <string name="catalog_on_device">V zařízení</string>
+   <string name="catalog_app_storage">Úložiště aplikace (smaže se při odinstalaci)</string>
+   <string name="catalog_waiting_network">Čekání na síť</string>
+   <string name="catalog_queued">Ve frontě</string>
+   <string name="catalog_no_selection">Vyberte knihu pro zobrazení podrobností</string>
+   <string name="catalog_tab_title">Katalog</string>
 </resources>

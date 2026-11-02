@@ -719,4 +719,13 @@
    <string name="update_librerax">Абнавіце LibreraX да апошняй версіі, каб імпартаваць з Librera.</string>
    <string name="reading_progress">Прагрэс чытання</string>
    <string name="add_to_home_screen">Дадаць на галоўны экран</string>
+   <string name="catalog_offline">Без сеткі · захаваныя вынікі</string>
+   <string name="catalog_offline_mode">Аўтаномны рэжым</string>
+   <string name="catalog_no_cached_page">Для гэтай старонкі няма захаваных вынікаў</string>
+   <string name="catalog_on_device">На прыладзе</string>
+   <string name="catalog_app_storage">Сховішча праграмы (выдаляецца разам з ёй)</string>
+   <string name="catalog_waiting_network">Чаканне сеткі</string>
+   <string name="catalog_queued">У чарзе</string>
+   <string name="catalog_no_selection">Выберыце кнігу, каб убачыць падрабязнасці</string>
+   <string name="catalog_tab_title">Каталог</string>
 </resources>

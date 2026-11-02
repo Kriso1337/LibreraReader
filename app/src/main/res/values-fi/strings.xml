@@ -719,4 +719,13 @@
    <string name="update_librerax">Päivitä LibreraX uusimpaan versioon tuodaksesi tiedot Librerasta.</string>
    <string name="reading_progress">Lukuedistyminen</string>
    <string name="add_to_home_screen">Lisää aloitusnäyttöön</string>
+   <string name="catalog_offline">Offline · tallennetut tulokset</string>
+   <string name="catalog_offline_mode">Offline-tila</string>
+   <string name="catalog_no_cached_page">Tälle sivulle ei ole tallennettuja tuloksia</string>
+   <string name="catalog_on_device">Laitteessa</string>
+   <string name="catalog_app_storage">Sovelluksen tallennustila (poistuu sovelluksen mukana)</string>
+   <string name="catalog_waiting_network">Odotetaan verkkoa</string>
+   <string name="catalog_queued">Jonossa</string>
+   <string name="catalog_no_selection">Valitse kirja nähdäksesi tiedot</string>
+   <string name="catalog_tab_title">Luettelo</string>
 </resources>

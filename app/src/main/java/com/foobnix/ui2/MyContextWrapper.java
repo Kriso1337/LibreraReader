@@ -37,8 +37,12 @@ public class MyContextWrapper {
         final float scale = BookCSS.get().appFontScale;
 
         Resources res = context.getResources();
-        Configuration configuration = res.getConfiguration();
-        configuration.fontScale = scale;
+        Configuration configuration = new Configuration(res.getConfiguration());
+        // Choosing an app language must not reset Android's accessibility font size.
+        // The default app scale follows the system; an explicit custom scale still wins.
+        if (Math.abs(scale - 1f) > 0.0001f) {
+            configuration.fontScale = scale;
+        }
 
         if (AppState.MY_SYSTEM_LANG.equals(AppState.get().appLang)) {
             language = Urls.getLangCode();

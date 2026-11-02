@@ -719,4 +719,13 @@
    <string name="update_librerax">Renova LibreraX ad ultimam versionem ut ex Librera importes.</string>
    <string name="reading_progress">Progressus lectionis</string>
    <string name="add_to_home_screen">Adde ad tabulam primariam</string>
+   <string name="catalog_offline">Sine interrete · eventus servati</string>
+   <string name="catalog_offline_mode">Modus sine interrete</string>
+   <string name="catalog_no_cached_page">Nulli eventus huius paginae servati sunt</string>
+   <string name="catalog_on_device">In instrumento</string>
+   <string name="catalog_app_storage">Repositorium applicationis (cum applicatione deletur)</string>
+   <string name="catalog_waiting_network">Rete exspectatur</string>
+   <string name="catalog_queued">In ordine</string>
+   <string name="catalog_no_selection">Librum elige ut singula videas</string>
+   <string name="catalog_tab_title">Catalogus</string>
 </resources>

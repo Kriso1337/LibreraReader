@@ -719,4 +719,13 @@
    <string name="update_librerax">Frissítse a LibreraX-et a legújabb verzióra a Librerából való importáláshoz.</string>
    <string name="reading_progress">Olvasási előrehaladás</string>
    <string name="add_to_home_screen">Hozzáadás a kezdőképernyőhöz</string>
+   <string name="catalog_offline">Offline · mentett találatok</string>
+   <string name="catalog_offline_mode">Offline mód</string>
+   <string name="catalog_no_cached_page">Ehhez az oldalhoz nincsenek mentett találatok</string>
+   <string name="catalog_on_device">Az eszközön</string>
+   <string name="catalog_app_storage">Alkalmazástárhely (eltávolításkor törlődik)</string>
+   <string name="catalog_waiting_network">Várakozás hálózatra</string>
+   <string name="catalog_queued">Sorban áll</string>
+   <string name="catalog_no_selection">Válasszon könyvet a részletekhez</string>
+   <string name="catalog_tab_title">Katalógus</string>
 </resources>

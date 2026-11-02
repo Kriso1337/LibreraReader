@@ -719,4 +719,13 @@
    <string name="update_librerax">Agiorna LibreraX a s\'ùrtima versione pro importare dae Librera.</string>
    <string name="reading_progress">Progressu de letura</string>
    <string name="add_to_home_screen">Agiunghe a s\'ischermu printzipale</string>
+   <string name="catalog_offline">Chene connessione · resultados sarvados</string>
+   <string name="catalog_offline_mode">Modalidade chene connessione</string>
+   <string name="catalog_no_cached_page">Non b\'at resultados sarvados pro custa pàgina</string>
+   <string name="catalog_on_device">In su dispositivu</string>
+   <string name="catalog_app_storage">Memòria de s\'aplicatzione (si bogat disinstallende)</string>
+   <string name="catalog_waiting_network">Ispetande sa rete</string>
+   <string name="catalog_queued">In coa</string>
+   <string name="catalog_no_selection">Sèbera unu libru pro bìdere sos detàllios</string>
+   <string name="catalog_tab_title">Catàlogu</string>
 </resources>
