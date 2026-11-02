@@ -33,6 +33,7 @@ import com.foobnix.model.AppProfile;
 import com.foobnix.model.AppState;
 import com.foobnix.pdf.info.R;
 import com.foobnix.pdf.info.model.BookCSS;
+import com.foobnix.pdf.info.wrapper.DocumentController;
 import com.foobnix.ui2.adapter.FileMetaAdapter;
 import com.foobnix.ui2.fragment.UIFragment;
 
@@ -54,7 +55,7 @@ public class LibraryDesignDeviceTest {
     private Context context;
     private ActivityScenario<MainTabs2> host;
     private String oldOrder, oldLanguage;
-    private int oldTheme, oldCurrentTab, oldRotation, oldAutoRotation;
+    private int oldTheme, oldCurrentTab, oldRotation, oldAutoRotation, oldOrientation;
     private boolean tablet;
     private boolean oldDay,oldSystemTheme,oldOffline,hadOffline;
     private float oldScale;
@@ -68,6 +69,7 @@ public class LibraryDesignDeviceTest {
         oldAutoRotation=Settings.System.getInt(context.getContentResolver(),Settings.System.ACCELEROMETER_ROTATION,1);
         oldCurrentTab=com.foobnix.sys.TempHolder.get().currentTab;
         AppState s=AppState.get(); oldOrder=s.tabsOrder9; oldLanguage=s.appLang;oldTheme=s.appTheme;
+        oldOrientation=s.orientation;
         oldDay=s.isDayNotInvert;oldSystemTheme=s.isSystemThemeColor;oldScale=BookCSS.get().appFontScale;oldLocales=LocaleList.getDefault();
         SharedPreferences prefs=context.getSharedPreferences("catalog-ui",Context.MODE_PRIVATE);
         hadOffline=prefs.contains("offline");oldOffline=prefs.getBoolean("offline",false);prefs.edit().putBoolean("offline",true).commit();
@@ -75,6 +77,7 @@ public class LibraryDesignDeviceTest {
     }
     @After public void after() throws Exception {
         AppState s=AppState.get();s.tabsOrder9=oldOrder;s.appLang=oldLanguage;s.appTheme=oldTheme;
+        s.orientation=oldOrientation;
         s.isDayNotInvert=oldDay;s.isSystemThemeColor=oldSystemTheme;BookCSS.get().appFontScale=oldScale;
         SharedPreferences.Editor edit=context.getSharedPreferences("catalog-ui",Context.MODE_PRIVATE).edit();
         if(hadOffline)edit.putBoolean("offline",oldOffline);else edit.remove("offline");edit.commit();
@@ -86,6 +89,61 @@ public class LibraryDesignDeviceTest {
             shell("cmd window user-rotation lock "+oldRotation);
             if(oldAutoRotation==1)shell("cmd window user-rotation free");
         }
+    }
+    @Test public void automaticOrientationFollowsSystemRotationLockAfterRecreation() throws Exception {
+        org.junit.Assume.assumeFalse("This acceptance check uses a portrait-native phone",tablet);
+        launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,1,false);
+        host.onActivity(activity->{
+            AppState.get().orientation=ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+            DocumentController.doRotation(activity);
+            assertEquals(ActivityInfo.SCREEN_ORIENTATION_USER,activity.getRequestedOrientation());
+        });
+        shell("cmd window user-rotation lock 0");
+        awaitOrientation(true);
+        shell("cmd window user-rotation lock 1");
+        awaitOrientation(false);
+        host.recreate();
+        awaitOrientation(false);
+        host.onActivity(activity->{
+            assertEquals(ActivityInfo.SCREEN_ORIENTATION_USER,activity.getRequestedOrientation());
+            assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR,AppState.get().orientation);
+        });
+        shell("cmd window user-rotation free");
+        host.onActivity(activity->assertEquals(ActivityInfo.SCREEN_ORIENTATION_USER,activity.getRequestedOrientation()));
+    }
+    @Test public void fixedOrientationsAndAxisChoicesPreserveTheirScope() throws Exception {
+        org.junit.Assume.assumeFalse("This acceptance check uses a portrait-native phone",tablet);
+        launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,1,false);
+        shell("cmd window user-rotation lock 0");
+        int[][] choices={
+                {ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,ActivityInfo.SCREEN_ORIENTATION_PORTRAIT},
+                {ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE},
+                {ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT,ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT},
+                {ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE,ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE},
+                {ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED,ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED}
+        };
+        for(int[] choice:choices) {
+            host.onActivity(activity->{
+                AppState.get().orientation=choice[0];
+                DocumentController.doRotation(activity);
+                assertEquals(choice[1],activity.getRequestedOrientation());
+            });
+            if(choice[0]!=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+                awaitOrientation(choice[0]==ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        || choice[0]==ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        }
+    }
+    private void awaitOrientation(boolean portrait) {
+        for(int i=0;i<80;i++) {
+            AtomicBoolean ready=new AtomicBoolean();
+            host.onActivity(activity->{
+                View pager=activity.findViewById(R.id.pager);
+                ready.set(pager.getWidth()>0 && (portrait?pager.getHeight()>pager.getWidth():pager.getWidth()>pager.getHeight()));
+            });
+            if(ready.get())return;
+            SystemClock.sleep(100);
+        }
+        fail("The library did not follow the selected orientation");
     }
     @Test public void portraitTabsKeepAllExistingToolbarActions() throws Exception {
         launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,1,false);

@@ -638,7 +638,19 @@ public abstract class DocumentController {
             // LOG.d("isSystemAutoRotation isSystemAutoRotation",
             // Dips.isSystemAutoRotation(a));
             // LOG.d("isSystemAutoRotation geUserRotation", Dips.geUserRotation(a));
-            a.setRequestedOrientation(AppState.get().orientation);
+            int orientation = AppState.get().orientation;
+            switch (orientation) {
+                case ActivityInfo.SCREEN_ORIENTATION_SENSOR:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_USER;
+                    break;
+                case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE;
+                    break;
+                case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT;
+                    break;
+            }
+            a.setRequestedOrientation(orientation);
         } catch (Exception e) {
             LOG.e(e);
         }
