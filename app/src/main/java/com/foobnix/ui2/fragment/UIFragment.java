@@ -701,13 +701,16 @@ public abstract class UIFragment<T> extends Fragment {
             widthDP = recyclerView.getResources().getConfiguration().screenWidthDp;
         }
         float scale = recyclerView.getResources().getConfiguration().fontScale;
+        if (gridColumnDP < 300 && getActivity() instanceof MainTabs2) {
+            return com.foobnix.ui2.BookshelfLayout.columns(widthDP, scale);
+        }
         int readable = Math.round(Math.max(156, gridColumnDP + 12) * (1 + (Math.max(1, Math.min(2, scale)) - 1) * .5f));
         return Math.max(gridMinColumns, widthDP / readable);
     }
 
     /** Recounts the columns when the window is resized, without waiting for the list to be rebuilt. */
     private final View.OnLayoutChangeListener onGridResize = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-        if (right - left == oldRight - oldLeft || gridColumnDP <= 0) {
+        if ((right - left == oldRight - oldLeft && bottom - top == oldBottom - oldTop) || gridColumnDP <= 0) {
             return;
         }
         if (!(recyclerView.getLayoutManager() instanceof GridLayoutManager)) {
@@ -718,6 +721,11 @@ public abstract class UIFragment<T> extends Fragment {
         if (grid.getSpanCount() != num) {
             // Not in the middle of the layout pass that reported the new width.
             recyclerView.post(() -> grid.setSpanCount(num));
+        }
+        if (bottom - top != oldBottom - oldTop && recyclerView.getAdapter() != null) {
+            recyclerView.post(() -> {
+                if (recyclerView != null && recyclerView.getAdapter() != null) recyclerView.getAdapter().notifyDataSetChanged();
+            });
         }
     };
 

@@ -184,6 +184,37 @@ public class CatalogPhoneDeviceTest {
         screenshot("phone-landscape-shelf");
         fixture(true, false); checkGeometry(); revealPrimary(); revealFolder(); screenshot("phone-landscape-book-actions");
     }
+    @Test public void portraitCatalogFitsThreeCompleteRowsBelowCompactControls() throws Exception {
+        launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,1.15f,false);
+        fixture(false,false,12);
+        host.onActivity(activity->{
+            CatalogFragment fragment=catalog(activity);
+            CatalogEntry navigation=new CatalogEntry();navigation.id="navigation-fixture";
+            navigation.title="Страница книги с подробным описанием";
+            navigation.summary="Подробное описание из каталога. ".repeat(24);
+            navigation.navigationUrl="https://flibusta.is/opds/book-fixture";
+            field(fragment,"page",CatalogPage.class).entries.add(0,navigation);
+            invoke(fragment,"showSection",new Class[0]);
+        });
+        settle();checkGeometry();
+        host.onActivity(activity->{
+            CatalogFragment fragment=catalog(activity);
+            RecyclerView list=field(fragment,"recyclerView",RecyclerView.class);
+            androidx.recyclerview.widget.GridLayoutManager grid=field(fragment,"layout",androidx.recyclerview.widget.GridLayoutManager.class);
+            View thirdRow=grid.findViewByPosition(grid.getSpanCount()*3-1);
+            assertNotNull("Three book rows are laid out",thirdRow);
+            assertTrue("Three whole book rows fit above navigation",bounds(thirdRow).bottom<=bounds(list).bottom-list.getPaddingBottom());
+            assertTrue("Controls reserve most of the viewport for books",list.getHeight()>=fragment.requireView().getHeight()*.55f);
+        });
+        screenshot("phone-catalog-three-rows");
+        host.onActivity(activity->{
+            CatalogFragment fragment=catalog(activity);
+            RecyclerView list=field(fragment,"recyclerView",RecyclerView.class);
+            assertTrue("The navigation card remains actionable",list.getLayoutManager().findViewByPosition(0).performClick());
+            Object destination=field(fragment,"location",Object.class);
+            assertEquals("https://flibusta.is/opds/book-fixture",field(destination,"url",String.class));
+        });
+    }
 
     @Test public void twoHundredPercentDarkTextDoesNotMergeControls() throws Exception {
         launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, 2f, true);
@@ -280,6 +311,10 @@ public class CatalogPhoneDeviceTest {
     }
 
     private void fixture(boolean selected, boolean queue) {
+        fixture(selected,queue,4);
+    }
+
+    private void fixture(boolean selected, boolean queue, int bookCount) {
         host.onActivity(activity -> {
             CatalogFragment fragment = catalog(activity);
             Future<?> pending = field(fragment, "requestFuture", Future.class);
@@ -293,8 +328,8 @@ public class CatalogPhoneDeviceTest {
             page.url = "https://flibusta.is/opds/new"; page.fromCache = true; page.fetchedAt = 1793577600000L;
             String[] titles = {"Капитанская дочка: повесть с примечаниями и дополнительными материалами", "Белые ночи", "Палата № 6", "Обломов"};
             String[] authors = {"Александр Сергеевич Пушкин", "Фёдор Достоевский", "Антон Павлович Чехов", "Иван Гончаров"};
-            for (int i = 0; i < titles.length; i++) {
-                CatalogEntry book = new CatalogEntry(); book.id = "phone-fixture-" + i; book.title = titles[i]; book.author = authors[i];
+            for (int i = 0; i < bookCount; i++) {
+                CatalogEntry book = new CatalogEntry(); book.id = "phone-fixture-" + i; book.title = titles[i%titles.length]; book.author = authors[i%authors.length];
                 book.summary = "Длинное описание проверяет читаемость текста и прокрутку карточки на узком экране. Все форматы, кнопка загрузки и выбор папки должны оставаться доступными.";
                 for (String type : new String[]{"EPUB", "FB2.ZIP", "PDF"}) {
                     CatalogAcquisition format = new CatalogAcquisition(); format.format = type;

@@ -73,7 +73,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
      * the last book: the pill's own height, the gap it is lifted by, and a little air. A
      * bar of icons alone is the shorter of the two and asks for less.
      */
-    private static final int FLOATING_SPACE_DIPS = 76;
+    private static final int FLOATING_SPACE_DIPS = 64;
     private static final int FLOATING_SPACE_ALONE_DIPS = 50;
     /**
      * A full stadium rounds to half the bar's height, the way LibreraX draws it; the pill
@@ -89,7 +89,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
     private static final int FLOATING_INSET_ALONE_DIPS = 3;
     private static final int FLOATING_ELEVATION_DIPS = 6;
     /** The icon in a tab, and the smaller one it draws where it stands without a name. */
-    private static final int TAB_ICON_DIPS = 28;
+    private static final int TAB_ICON_DIPS = 24;
     private static final int TAB_ICON_ALONE_DIPS = 24;
 
     private final SlidingTabStrip mTabStrip;

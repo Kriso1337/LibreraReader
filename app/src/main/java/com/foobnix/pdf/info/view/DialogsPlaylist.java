@@ -634,6 +634,7 @@ public class DialogsPlaylist {
         };
 
         playListName.setOnClickListener(onChoosePlaylist);
+        ReaderChrome.apply(a);
 
     }
 

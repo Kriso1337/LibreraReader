@@ -17,7 +17,7 @@ public class CatalogLayoutPolicyTest {
         assertFalse(CatalogLayoutPolicy.isTwoPane(800, 1f));
         assertFalse(CatalogLayoutPolicy.isTwoPane(600, 1f));
         assertFalse(CatalogLayoutPolicy.isTwoPane(320, 1f));
-        assertEquals(1, CatalogLayoutPolicy.columns(288, 1f));
+        assertEquals(2, CatalogLayoutPolicy.columns(288, 1f));
     }
 
     @Test public void phoneLandscapeReservesHeightForTheShelf() {
@@ -31,8 +31,8 @@ public class CatalogLayoutPolicyTest {
         assertEquals(1, CatalogLayoutPolicy.compactColumns(500, 1.15f));
     }
 
-    @Test public void normalPhoneTextKeepsTwoColumnsButAccessibilityTextReflows() {
-        assertEquals(2, CatalogLayoutPolicy.columns(352, 1.15f));
+    @Test public void normalPhoneTextKeepsThreeColumnsButAccessibilityTextReflows() {
+        assertEquals(3, CatalogLayoutPolicy.columns(352, 1.15f));
         assertEquals(1, CatalogLayoutPolicy.columns(352, 2f));
     }
 

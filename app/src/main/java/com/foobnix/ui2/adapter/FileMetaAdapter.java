@@ -17,6 +17,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -52,6 +53,7 @@ import com.foobnix.ui2.AppRecycleAdapter;
 import com.foobnix.pdf.info.wrapper.MagicHelper;
 import com.foobnix.ui2.MainTabs2;
 import com.foobnix.ui2.LibraryDesign;
+import com.foobnix.ui2.BookshelfLayout;
 import com.foobnix.ui2.adapter.AuthorsAdapter2.AuthorViewHolder;
 import com.foobnix.ui2.fast.FastScroller;
 
@@ -88,6 +90,17 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
     public int tempValue2 = TEMP2_NONE;
 
     private int adapterType = ADAPTER_LIST;
+    private RecyclerView bookshelf;
+
+    @Override public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        bookshelf = recyclerView;
+    }
+
+    @Override public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        if (bookshelf == recyclerView) bookshelf = null;
+    }
     private ResultResponse<FileMeta> onMenuClickListener;
     private ResultResponse<FileMeta> onDeleteClickListener;
     private ResultResponse<String> onAuthorClickListener;
@@ -368,12 +381,12 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
                     }).into(holder.image);
                 } else {
                     holder.image.setImageResource(R.drawable.glyphicons_145_folder_open);
-                    TintUtil.setTintImageWithAlpha(holder.image, holder.image.getContext() instanceof MainTabs2 ? TintUtil.getColorInDayNighth() : TintUtil.getColorInDayNighthBook());
+                    TintUtil.setTintImageWithAlpha(holder.image,holder.image.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : TintUtil.getColorInDayNighthBook());
                 }
 
             }
 
-            TintUtil.setTintImageWithAlpha(holder.starIcon, holder.starIcon.getContext() instanceof MainTabs2 ? TintUtil.getColorInDayNighth() : TintUtil.getColorInDayNighthBook());
+            TintUtil.setTintImageWithAlpha(holder.starIcon,holder.starIcon.getContext() instanceof MainTabs2 ? LibraryDesign.accent() : TintUtil.getColorInDayNighthBook());
 
 
             if (onStarClickListener != null) {
@@ -925,6 +938,10 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             boolean coversOnly = adapterType == ADAPTER_COVERS;
             holder.layoutBootom.setVisibility(coversOnly ? View.GONE : View.VISIBLE);
             holder.infoLayout.setVisibility(coversOnly ? View.GONE : View.VISIBLE);
+            if(holder.parent.findViewById(R.id.bookCoverFrame)!=null) {
+                holder.star.setVisibility(coversOnly ? View.GONE : View.VISIBLE);
+                holder.menu.setVisibility(coversOnly ? View.GONE : View.VISIBLE);
+            }
             // In covers the tile is the cover and nothing else. The card that carries the
             // title in the grid would only draw a pale edge around it, and the sheet the
             // image is backed by would show wherever the cover does not fill it.
@@ -982,6 +999,14 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             @Override
             public void onClick(View v) {
                 if (onMenuClickListener != null && fileMeta != null) {
+                    if (adapterType == ADAPTER_GRID && holder.parent.getContext() instanceof MainTabs2 && onStarClickListener != null) {
+                        PopupMenu actions = new PopupMenu(v.getContext(),v);
+                        actions.getMenu().add(Boolean.TRUE.equals(fileMeta.getIsStar()) ? R.string.remove_from_favorites : R.string.add_to_favorites)
+                                .setOnMenuItemClickListener(item -> onStarClickListener.onResultRecive(fileMeta,FileMetaAdapter.this));
+                        actions.getMenu().add(R.string.book_menu).setOnMenuItemClickListener(item -> onMenuClickListener.onResultRecive(fileMeta));
+                        actions.show();
+                        return;
+                    }
                     onMenuClickListener.onResultRecive(fileMeta);
                 }
             }
@@ -1035,12 +1060,38 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
             LibraryDesign.card(holder.parent, adapterType == ADAPTER_COVERS);
             holder.title.setTextColor(LibraryDesign.ink());
             holder.author.setTextColor(AppState.get().isUiTextColor ? AppState.get().uiTextColor : LibraryDesign.muted());
-            holder.title.setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD);
-            if (adapterType == ADAPTER_GRID) { holder.title.setSingleLine(false); holder.title.setMaxLines(3); holder.title.setTextSize(16); }
+            holder.title.setTypeface(android.graphics.Typeface.create("sans-serif-medium",android.graphics.Typeface.NORMAL));
+            if (adapterType == ADAPTER_GRID) {
+                holder.title.setSingleLine(false); holder.title.setLines(2); holder.title.setTextSize(14);
+                holder.title.setIncludeFontPadding(false); holder.title.setLineSpacing(0,1f);
+                holder.author.setSingleLine(true); holder.author.setTextSize(12); holder.author.setIncludeFontPadding(false);
+                holder.infoLayout.setPadding(0,Dips.dpToPx(4),0,0);
+            }
             if (holder.layoutBootom != null) holder.layoutBootom.setPadding(Dips.dpToPx(10),Dips.dpToPx(10),Dips.dpToPx(10),Dips.dpToPx(6));
             for (TextView label : new TextView[]{holder.path,holder.browserExt,holder.size,holder.date,holder.series,holder.idPercentText})
                 if (label != null) label.setTextColor(label == holder.series && AppState.get().isUiTextColor ? AppState.get().uiTextColor : LibraryDesign.muted());
             LibraryDesign.action(holder.star); LibraryDesign.action(holder.menu); LibraryDesign.action(holder.remove);
+            if ((adapterType == ADAPTER_GRID || adapterType == ADAPTER_COVERS) && bookshelf != null) {
+                int columns = bookshelf.getLayoutManager() instanceof androidx.recyclerview.widget.GridLayoutManager
+                        ? ((androidx.recyclerview.widget.GridLayoutManager) bookshelf.getLayoutManager()).getSpanCount() : 1;
+                float density = bookshelf.getResources().getDisplayMetrics().density;
+                float cell = (bookshelf.getWidth() - bookshelf.getPaddingLeft() - bookshelf.getPaddingRight()) / density / columns;
+                int height = BookshelfLayout.coverHeight(cell,(bookshelf.getHeight() - bookshelf.getPaddingTop()
+                        - bookshelf.getPaddingBottom()) / density,bookshelf.getResources().getConfiguration().fontScale,adapterType == ADAPTER_GRID);
+                LayoutParams jacket = holder.imageParent.getLayoutParams();
+                jacket.width = Dips.dpToPx(Math.round(height / 1.4f)); jacket.height = Dips.dpToPx(height);
+                holder.imageParent.setLayoutParams(jacket);
+                LayoutParams image = holder.image.getLayoutParams(); image.width = jacket.width; image.height = jacket.height;
+                holder.image.setLayoutParams(image);
+                holder.image.setMaxHeight(jacket.height);
+                if (holder.layoutBootom != null) holder.layoutBootom.setPadding(0,Dips.dpToPx(6),0,0);
+                if (holder.browserExt != null) { holder.browserExt.setTextSize(11); holder.browserExt.setIncludeFontPadding(false); }
+                if (holder.idPercentText != null) { holder.idPercentText.setTextSize(11); holder.idPercentText.setIncludeFontPadding(false); }
+                LibraryDesign.coverAction(holder.star); LibraryDesign.coverAction(holder.menu);
+                holder.star.setVisibility(adapterType == ADAPTER_GRID && tempValue != TEMP_VALUE_SERIES
+                        && Boolean.TRUE.equals(fileMeta.getIsStar()) ? View.VISIBLE : View.GONE);
+                holder.menu.setVisibility(adapterType == ADAPTER_GRID && tempValue != TEMP_VALUE_SERIES ? View.VISIBLE : View.GONE);
+            }
             if (holder.star.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
                 ViewGroup.MarginLayoutParams actionParams=(ViewGroup.MarginLayoutParams)holder.star.getLayoutParams();
                 actionParams.setMarginEnd(Dips.dpToPx(8));holder.star.setLayoutParams(actionParams);
@@ -1249,7 +1300,7 @@ public class FileMetaAdapter extends AppRecycleAdapter<FileMeta, RecyclerView.Vi
      * card on a night theme.
      */
     private static int accentColor(View view) {
-        return view.getContext() instanceof MainTabs2 ? TintUtil.getColorInDayNighth() :
+        return view.getContext() instanceof MainTabs2 ? LibraryDesign.accent() :
                 TintUtil.getColorInDayNighthBook();
     }
 

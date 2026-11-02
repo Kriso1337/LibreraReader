@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 import androidx.core.view.WindowCompat;
+import androidx.core.widget.TextViewCompat;
 
 import com.foobnix.pdf.info.R;
 import com.foobnix.pdf.info.TintUtil;
@@ -50,8 +51,8 @@ public final class ReaderChrome {
         for (int id : new int[]{R.id.menuLayout, R.id.actionBar, R.id.bottomBar}) {
             View panel = root.findViewById(id);
             if (panel == null) continue;
-            panel.setBackground(shape(panel, palette.paper, 20, true, palette));
-            panel.setElevation(dp(panel, 4));
+            panel.setBackground(shape(panel,palette.paper,16,true,palette));
+            panel.setElevation(dp(panel,2));
             tintControls(panel, true, palette);
         }
         View outer = root.findViewById(R.id.bottomBar1);
@@ -68,7 +69,7 @@ public final class ReaderChrome {
         for (int id : new int[]{R.id.title, R.id.bookName}) {
             TextView name = root.findViewById(id);
             if (name != null) {
-                name.setTypeface(Typeface.create("serif", Typeface.NORMAL));
+                name.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));
                 name.setEllipsize(TextUtils.TruncateAt.END);
             }
         }
@@ -92,7 +93,7 @@ public final class ReaderChrome {
         if (popup instanceof CardView) {
             CardView card = (CardView) popup;
             card.setCardBackgroundColor(palette.paper);
-            card.setRadius(dp(card, 20)); card.setCardElevation(dp(card, 6));
+            card.setRadius(dp(card,16)); card.setCardElevation(dp(card,3));
         }
         View header = popup.findViewById(R.id.topLayout);
         if (header != null) {
@@ -103,7 +104,7 @@ public final class ReaderChrome {
         TextView title = popup.findViewById(R.id.dialogTitle);
         if (title != null) {
             title.setAllCaps(false); title.setSingleLine(false); title.setMaxLines(2);
-            title.setTextSize(20); title.setTypeface(Typeface.create("serif", Typeface.NORMAL));
+            title.setTextSize(20); title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
             title.setEllipsize(TextUtils.TruncateAt.END);
         }
         TextView back = popup.findViewById(R.id.onTitleAction);
@@ -129,6 +130,13 @@ public final class ReaderChrome {
         if (view instanceof TextView) {
             TextView text = (TextView) view;
             text.setTextColor(palette.ink);
+            if (view.getId()==R.id.playListName || view.getId()==R.id.playListNameEdit) {
+                text.setTextColor(palette.accent);
+                TextViewCompat.setCompoundDrawableTintList(text,ColorStateList.valueOf(palette.accent));
+                text.setTextSize(14);text.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));
+                text.setBackground(new RippleDrawable(ColorStateList.valueOf(0x22224E3B),
+                        shape(view,palette.surface,10,false,palette),null));
+            }
             if (spacious && view.isClickable()) touchTarget(view, false);
         }
         if (view instanceof ImageView) {
@@ -138,7 +146,7 @@ public final class ReaderChrome {
             if (spacious && (view.isClickable() || view.getContentDescription() != null)) {
                 touchTarget(view, true);
                 view.setBackground(new RippleDrawable(ColorStateList.valueOf(0x22224E3B),
-                        shape(view, palette.surface, 14, true, palette), null));
+                        shape(view,palette.surface,10,false,palette),null));
                 view.setPadding(dp(view, 12), dp(view, 12), dp(view, 12), dp(view, 12));
                 if (view.getLayoutParams() instanceof LinearLayout.LayoutParams) {
                     LinearLayout.LayoutParams p = (LinearLayout.LayoutParams) view.getLayoutParams();
@@ -255,14 +263,14 @@ public final class ReaderChrome {
             } else {
                 boolean oled = dark && AppState.get().appTheme == AppState.THEME_DARK_OLED;
                 boolean eink = AppState.get().appTheme == AppState.THEME_INK;
-                paper = oled ? Color.BLACK : Color.parseColor(dark ? "#181E1B" : "#F7F5EE");
-                surface = oled ? Color.BLACK : Color.parseColor(dark ? "#232C27" : "#FFFEF9");
-                ink = eink ? Color.BLACK : Color.parseColor(dark ? "#EDF1E6" : "#243C31");
-                muted = eink ? Color.BLACK : Color.parseColor(dark ? "#ABB9AD" : "#66746B");
+                paper = oled ? Color.BLACK : Color.parseColor(dark ? "#12191D" : "#F5F7F8");
+                surface = oled ? Color.BLACK : Color.parseColor(dark ? "#1D272D" : "#FFFFFF");
+                ink = eink ? Color.BLACK : Color.parseColor(dark ? "#E7EEF0" : "#17272E");
+                muted = eink ? Color.BLACK : Color.parseColor(dark ? "#ADBCC2" : "#596970");
                 int stock = Color.parseColor(AppState.STYLE_COLORS.get(AppState.DEFAULT_STYLE_COLOR));
                 accent = eink ? Color.BLACK : AppState.get().tintThemeColor != stock ? TintUtil.getColorInDayNighth()
                         : Color.parseColor(dark ? "#B5D0BA" : "#244C3A");
-                line = Color.parseColor(dark ? "#39473D" : "#DFE3D8");
+                line = Color.parseColor(dark ? "#34434A" : "#DDE5E8");
             }
         }
     }

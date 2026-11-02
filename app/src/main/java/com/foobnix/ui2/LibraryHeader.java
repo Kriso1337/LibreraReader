@@ -3,25 +3,82 @@ package com.foobnix.ui2;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.foobnix.pdf.info.R;
 
-/** A toolbar that wraps existing actions instead of squeezing or hiding them on a phone. */
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+
 public final class LibraryHeader extends LinearLayout {
     private final List<int[]> positions = new ArrayList<>();
+    private final Map<View, Integer> collapsedViews = new IdentityHashMap<>();
+    private final ImageView overflow;
+    private boolean expanded;
 
-    public LibraryHeader(Context context, AttributeSet attrs) { super(context, attrs); }
+    public LibraryHeader(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        overflow = new ImageView(context);
+        overflow.setTag("library-header-actions");
+        overflow.setImageResource(R.drawable.ic_catalog_filter);
+        overflow.setContentDescription(context.getString(R.string.filter));
+        overflow.setClickable(true);
+        overflow.setFocusable(true);
+        overflow.setVisibility(GONE);
+        overflow.setOnClickListener(view -> {
+            expanded = !expanded;
+            overflow.setSelected(expanded);
+            requestLayout();
+        });
+        addView(overflow, new LayoutParams(LibraryDesign.dp(this, 48), LibraryDesign.dp(this, 48)));
+    }
+
+    @Override protected void onFinishInflate() {
+        super.onFinishInflate();
+        removeView(overflow);
+        addView(overflow);
+    }
 
     @Override protected void onMeasure(int widthSpec, int heightSpec) {
         int width = MeasureSpec.getSize(widthSpec);
         int available = Math.max(1, width - getPaddingLeft() - getPaddingRight());
+        boolean compact = available / getResources().getDisplayMetrics().density < 600 && getChildCount() > 3;
+        for (Map.Entry<View, Integer> entry : collapsedViews.entrySet()) {
+            if (entry.getKey().getVisibility() == INVISIBLE) entry.getKey().setVisibility(entry.getValue());
+        }
+        collapsedViews.clear();
+        int primary = -1;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child != overflow && ((LayoutParams) child.getLayoutParams()).weight > 0) {
+                primary = i;
+                break;
+            }
+        }
+        boolean hasOverflow = false;
+        if (compact && primary >= 0) {
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                if (child == overflow || i == primary || (i == 0 && primary == 1)) continue;
+                if (child.getVisibility() == VISIBLE) {
+                    hasOverflow = true;
+                    if (!expanded) {
+                        collapsedViews.put(child, child.getVisibility());
+                        child.setVisibility(INVISIBLE);
+                    }
+                }
+            }
+        }
+        overflow.setVisibility(hasOverflow ? VISIBLE : GONE);
+        LibraryDesign.action(overflow);
         int gap = LibraryDesign.dp(this, 6);
         int flexible = -1, fixedWidth = 0, before = 0, visible = 0;
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE) continue;
+            if (child.getVisibility() != VISIBLE) continue;
             LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (lp.weight > 0 && flexible < 0) { flexible = i; before = fixedWidth; }
             else {
@@ -46,7 +103,7 @@ public final class LibraryHeader extends LinearLayout {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            if (child.getVisibility() == GONE) { positions.add(new int[]{0, 0}); continue; }
+            if (child.getVisibility() != VISIBLE) { positions.add(new int[]{0, 0}); continue; }
             int childWidth = child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin;
             if (x > 0 && x + childWidth > available) { y += rowHeight + gap; x = 0; rowHeight = 0; }
             positions.add(new int[]{getPaddingLeft() + x + lp.leftMargin, y + lp.topMargin});
@@ -61,7 +118,7 @@ public final class LibraryHeader extends LinearLayout {
         boolean rtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         for (int i = 0; i < getChildCount() && i < positions.size(); i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE) continue;
+            if (child.getVisibility() != VISIBLE) continue;
             int[] at = positions.get(i);
             int x = rtl ? getWidth() - at[0] - child.getMeasuredWidth() : at[0];
             child.layout(x, at[1], x + child.getMeasuredWidth(), at[1] + child.getMeasuredHeight());

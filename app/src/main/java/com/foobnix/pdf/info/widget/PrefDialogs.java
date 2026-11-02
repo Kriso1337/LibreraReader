@@ -240,12 +240,23 @@ public class PrefDialogs {
 
     /** The add folder and add storage buttons - ring, mark and words - in the theme colour. */
     public static void tintAddCards(View root, int accent) {
+        boolean library=root.getContext() instanceof MainTabs2;
+        if(library)accent=com.foobnix.ui2.LibraryDesign.accent();
         ((ImageView) root.findViewById(R.id.addLibraryFolderIcon)).setColorFilter(accent);
         ((ImageView) root.findViewById(R.id.addLibraryStorageIcon)).setColorFilter(accent);
         ((TextView) root.findViewById(R.id.addLibraryFolderText)).setTextColor(accent);
         ((TextView) root.findViewById(R.id.addLibraryStorageText)).setTextColor(accent);
-        TintUtil.setRingColor(root.findViewById(R.id.addLibraryFolder), accent);
-        TintUtil.setRingColor(root.findViewById(R.id.addLibraryStorage), accent);
+        if(library) {
+            for(int id:new int[]{R.id.addLibraryFolder,R.id.addLibraryStorage})
+                com.foobnix.ui2.LibraryDesign.action(root.findViewById(id));
+            for(int id:new int[]{R.id.addLibraryFolderText,R.id.addLibraryStorageText}) {
+                TextView label=root.findViewById(id);label.setTextSize(14);label.setSingleLine(false);label.setMaxLines(3);label.setEllipsize(null);
+                LinearLayout.LayoutParams params=(LinearLayout.LayoutParams)label.getLayoutParams();params.width=0;params.weight=1;label.setLayoutParams(params);
+            }
+        } else {
+            TintUtil.setRingColor(root.findViewById(R.id.addLibraryFolder),accent);
+            TintUtil.setRingColor(root.findViewById(R.id.addLibraryStorage),accent);
+        }
     }
 
     /** One folder of the library: its mark in a round of the theme colour, its name, where it is, and the button that drops it. */

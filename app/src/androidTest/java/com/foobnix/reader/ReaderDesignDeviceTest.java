@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.LinearLayout;
 
 import androidx.core.graphics.ColorUtils;
+import androidx.core.widget.TextViewCompat;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -146,6 +147,10 @@ public class ReaderDesignDeviceTest {
             assertTrue("Action listener is preserved", button.performClick());
         }
         assertEquals(actions.length, clicks.get());
+        TextView playlist=root.findViewById(R.id.playListName);
+        assertTrue("The playlist label contrasts with the reader panel",
+                ColorUtils.calculateContrast(playlist.getCurrentTextColor(),ReaderChrome.paper())>=4.5);
+        assertNotNull("The playlist icon follows the reader palette",TextViewCompat.getCompoundDrawableTintList(playlist));
         checkStrip(root, paged ? R.id.readerAppearanceTools : R.id.readerPrimaryTools,
                 paged ? R.id.bookPref : R.id.prefTop);
         checkStrip(root, R.id.readerNavigationTools, R.id.linkHistory);

@@ -15,6 +15,7 @@ import android.os.ParcelFileDescriptor;
 import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -105,14 +106,16 @@ public class LibraryDesignDeviceTest {
         for(int tab=0;tab<required.length;tab++) {
             select(tab);
             final int[] actions=required[tab];
+            final boolean settings=tab==6;
             host.onActivity(a->{
                 View root=current(a).requireView();
                 for(int id:actions)assertNotNull("Existing toolbar action is retained: "+id,root.findViewById(id));
                 assertHeaders(root);
+                if(settings)assertSectionContrast(root.findViewById(R.id.section1));
             });
             if(tab==0 || tab==2 || tab==3) {
                 fixtureBooks(tab==0); screenshot("library-portrait-tab-"+tab);
-            }
+            } else screenshot("library-portrait-tab-"+tab);
         }
     }
     @Test public void landscapeCardsAndCallbacksRemainUsable() throws Exception {
@@ -132,10 +135,57 @@ public class LibraryDesignDeviceTest {
         });
         screenshot("library-landscape-list");
     }
+    @Test public void portraitLibraryKeepsThreeRowsAndRevealsSecondaryActionsOnDemand() throws Exception {
+        launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,1.15f,false);select(0);fixtureBooks(true);
+        host.onActivity(a->{
+            View root=current(a).requireView();
+            View toggle=root.findViewWithTag("library-header-actions");
+            assertNotNull(toggle);assertTrue(toggle.isShown());
+            assertFalse(root.findViewById(R.id.sortBy).isShown());
+            RecyclerView list=root.findViewById(R.id.recyclerView);
+            GridLayoutManager grid=(GridLayoutManager)list.getLayoutManager();
+            View thirdRow=grid.findViewByPosition(grid.getSpanCount()*3-1);
+            assertNotNull("Three book rows are laid out",thirdRow);
+            assertTrue("Three whole book rows fit above navigation",bounds(thirdRow).bottom<=bounds(list).bottom-list.getPaddingBottom());
+            toggle.performClick();
+        });
+        settle();
+        host.onActivity(a->{
+            View root=current(a).requireView();
+            assertTrue("Sort remains available after expanding actions",root.findViewById(R.id.sortBy).isShown());
+            assertHeaders(root);
+            root.findViewWithTag("library-header-actions").performClick();
+        });
+        settle();screenshot("library-three-rows");
+    }
+    @Test public void gridMenuKeepsFavoritesAvailableWithoutPermanentButtons() throws Exception {
+        launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,1.15f,false);select(0);fixtureBooks(true);
+        AtomicBoolean favorite=new AtomicBoolean();
+        host.onActivity(a->{
+            RecyclerView list=current(a).requireView().findViewById(R.id.recyclerView);
+            FileMetaAdapter adapter=(FileMetaAdapter)list.getAdapter();
+            adapter.setOnMenuClickListener(book -> true);
+            adapter.setOnStarClickListener((book,source) -> {favorite.set(true);return true;});
+            assertFalse(list.getChildAt(0).findViewById(R.id.starIcon).isShown());
+            list.getChildAt(0).findViewById(R.id.itemMenu).performClick();
+        });
+        settle();screenshot("library-book-actions");
+        AccessibilityNodeInfo root=instrumentation.getUiAutomation().getRootInActiveWindow();
+        assertNotNull(root);
+        List<AccessibilityNodeInfo> matches=root.findAccessibilityNodeInfosByText(context.getString(R.string.add_to_favorites));
+        assertFalse("Favorite action is exposed in the book menu",matches.isEmpty());
+        AccessibilityNodeInfo action=matches.get(0);
+        while(action!=null && !action.isClickable())action=action.getParent();
+        assertNotNull(action);assertTrue(action.performAction(AccessibilityNodeInfo.ACTION_CLICK));
+        settle();assertTrue("Original favorite callback is retained",favorite.get());
+    }
     @Test public void largeDarkTextReflowsToolbarsAndBookGrid() throws Exception {
         launch(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,2,true);
         for(int tab:new int[]{0,3,4,6}) {
-            select(tab);host.onActivity(a->assertHeaders(current(a).requireView()));
+            select(tab);host.onActivity(a->{
+                View root=current(a).requireView();assertHeaders(root);
+                if(tab==6)assertSettingsText(root);
+            });
             if(tab==0){fixtureBooks(true);screenshot("library-dark-large-grid");}
         }
     }
@@ -167,15 +217,16 @@ public class LibraryDesignDeviceTest {
             FileMetaAdapter adapter=new FileMetaAdapter();adapter.setAdapterType(grid?FileMetaAdapter.ADAPTER_GRID:FileMetaAdapter.ADAPTER_LIST);
             String[] titles={"Капитанская дочка: повесть с примечаниями", "Белые ночи", "Палата № 6", "Обломов"};
             String[] authors={"Александр Сергеевич Пушкин","Фёдор Достоевский","Антон Чехов","Иван Гончаров"};
-            for(int i=0;i<titles.length;i++) {
-                FileMeta book=new FileMeta(new File(context.getCacheDir(),"library-visual-fixtures/"+titles[i]+".epub").getPath());
-                book.setTitle(titles[i]);book.setAuthor(authors[i]);book.setPathTxt(titles[i]);book.setExt("EPUB");
+            for(int i=0;i<12;i++) {
+                String title=titles[i%titles.length];
+                FileMeta book=new FileMeta(new File(context.getCacheDir(),"library-visual-fixtures/"+i+"-"+title+".epub").getPath());
+                book.setTitle(title);book.setAuthor(authors[i%authors.length]);book.setPathTxt(title);book.setExt("EPUB");
                 book.setCusType(FileMetaAdapter.DISPLAY_TYPE_FILE);book.setIsRecentProgress(.24f);book.setIsStar(false);
                 book.setSizeTxt("240 KB");book.setDateTxt("02.11.2026");adapter.getItemsList().add(book);
             }
             float scale=a.getResources().getConfiguration().fontScale;
             int width=Math.round(list.getWidth()/a.getResources().getDisplayMetrics().density);
-            list.setLayoutManager(grid?new GridLayoutManager(a,Math.max(1,width/Math.round(176*Math.max(1,scale*.75f)))):new LinearLayoutManager(a));
+            list.setLayoutManager(grid?new GridLayoutManager(a,BookshelfLayout.columns(width,scale)):new LinearLayoutManager(a));
             list.setAdapter(adapter);
         });settle();
         awaitCover();
@@ -183,7 +234,8 @@ public class LibraryDesignDeviceTest {
             RecyclerView list=current(a).requireView().findViewById(R.id.recyclerView);
             View card=list.getChildAt(0);assertNotNull(card);
             View star=card.findViewById(R.id.starIcon), menu=card.findViewById(R.id.itemMenu);
-            assertTrue("Book actions keep 8dp gap",bounds(menu).left-bounds(star).right>=8*a.getResources().getDisplayMetrics().density-1);
+            if(grid)assertTrue("Book menu remains directly accessible",menu.isShown());
+            if(star.isShown())assertTrue("Book actions keep 8dp gap",bounds(menu).left-bounds(star).right>=8*a.getResources().getDisplayMetrics().density-1);
             TextView format=card.findViewById(R.id.browserExt);assertNotNull(format.getLayout());
             assertTrue("Book format is not truncated",format.getLayout().getEllipsisCount(0)==0 && format.getPaint().measureText(format.getText().toString())<=format.getWidth()+1);
         });
@@ -212,6 +264,25 @@ public class LibraryDesignDeviceTest {
             for(int i=0;i<actions.size();i++)for(int j=i+1;j<actions.size();j++)assertFalse("Toolbar actions overlap",Rect.intersects(bounds(actions.get(i)),bounds(actions.get(j))));
         }
         if(view instanceof ViewGroup)for(int i=0;i<((ViewGroup)view).getChildCount();i++)assertHeaders(((ViewGroup)view).getChildAt(i));
+    }
+    private void assertSectionContrast(View view) {
+        assertNotNull(view);
+        if(view instanceof TextView)assertTrue("Section heading is readable on the page",
+                androidx.core.graphics.ColorUtils.calculateContrast(((TextView)view).getCurrentTextColor(),LibraryDesign.paper())>=4.5);
+        if(view instanceof ViewGroup)for(int i=0;i<((ViewGroup)view).getChildCount();i++)assertSectionContrast(((ViewGroup)view).getChildAt(i));
+    }
+    private void assertSettingsText(View view) {
+        if(!view.isShown())return;
+        if(view instanceof TextView && view.isClickable() && view.getGlobalVisibleRect(new Rect())) {
+            TextView text=(TextView)view;
+            if(text.getLayout()!=null) {
+                assertTrue("Setting action fits its text: "+text.getText(),text.getLayout().getHeight()
+                        +text.getCompoundPaddingTop()+text.getCompoundPaddingBottom()<=view.getHeight()+1);
+                for(int line=0;line<text.getLayout().getLineCount();line++)
+                    assertEquals("Setting action is not truncated: "+text.getText(),0,text.getLayout().getEllipsisCount(line));
+            }
+        }
+        if(view instanceof ViewGroup)for(int i=0;i<((ViewGroup)view).getChildCount();i++)assertSettingsText(((ViewGroup)view).getChildAt(i));
     }
     private void collectActions(View v,List<View> out) {
         if(!v.isShown())return;
