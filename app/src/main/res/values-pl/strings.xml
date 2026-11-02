@@ -719,4 +719,15 @@
    <string name="update_librerax">Zaktualizuj LibreraX do najnowszej wersji, aby importować z Librera.</string>
    <string name="reading_progress">Postęp czytania</string>
    <string name="add_to_home_screen">Dodaj do ekranu głównego</string>
+   <string name="catalog_offline">Offline · zapisane wyniki</string>
+   <string name="catalog_offline_mode">Tryb offline</string>
+   <string name="catalog_no_cached_page">Brak zapisanych wyników dla tej strony</string>
+   <string name="catalog_on_device">Na urządzeniu</string>
+   <string name="catalog_app_storage">Pamięć aplikacji (usuwana przy odinstalowaniu)</string>
+   <string name="catalog_waiting_network">Oczekiwanie na sieć</string>
+   <string name="catalog_queued">W kolejce</string>
+   <string name="catalog_no_selection">Wybierz książkę, aby zobaczyć szczegóły</string>
+   <string name="catalog_tab_title">Katalog</string>
+   <string name="catalog_saved_results">Zapisane wyniki</string>
+   <string name="catalog_filter_scope">Filtry dotyczą wczytanych książek</string>
 </resources>

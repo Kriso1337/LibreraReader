@@ -83,8 +83,8 @@ public class TTSControlsView extends FrameLayout {
     };
 
     /**
-     * The row does not wrap and a dialog can be narrower than its buttons, the more so with the
-     * track buttons of an MP3 showing: they give up size there rather than being cut off.
+     * Long speech/MP3 rows scroll horizontally. Touch targets never shrink below 48dp when a
+     * playlist title or a small settings window leaves little room for the controls.
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -101,7 +101,8 @@ public class TTSControlsView extends FrameLayout {
                 }
             }
             final int full = getResources().getDimensionPixelSize(R.dimen.wh_tts_button);
-            final int size = visible == 0 ? full : Math.min(full, (available - margins) / visible);
+            final int minimum = Math.round(48 * getResources().getDisplayMetrics().density);
+            final int size = Math.max(minimum, visible == 0 ? full : Math.min(full, (available - margins) / visible));
             for (int i = 0; i < row.getChildCount(); i++) {
                 final ViewGroup.LayoutParams params = row.getChildAt(i).getLayoutParams();
                 params.width = size;

@@ -719,4 +719,15 @@
    <string name="update_librerax">Librera-дан импорттау үшін LibreraX-ті соңғы нұсқаға жаңартыңыз.</string>
    <string name="reading_progress">Оқу барысы</string>
    <string name="add_to_home_screen">Басты экранға қосу</string>
+   <string name="catalog_offline">Желі жоқ · сақталған нәтижелер</string>
+   <string name="catalog_offline_mode">Офлайн режимі</string>
+   <string name="catalog_no_cached_page">Бұл бет үшін сақталған нәтижелер жоқ</string>
+   <string name="catalog_on_device">Құрылғыда</string>
+   <string name="catalog_app_storage">Қолданба қоймасы (қолданба жойылғанда өшіріледі)</string>
+   <string name="catalog_waiting_network">Желіні күту</string>
+   <string name="catalog_queued">Кезекте</string>
+   <string name="catalog_no_selection">Мәліметтерді көру үшін кітапты таңдаңыз</string>
+   <string name="catalog_tab_title">Каталог</string>
+   <string name="catalog_saved_results">Сақталған нәтижелер</string>
+   <string name="catalog_filter_scope">Сүзгілер жүктелген кітаптар тізіміне қолданылады</string>
 </resources>

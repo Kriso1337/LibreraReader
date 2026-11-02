@@ -719,4 +719,15 @@
    <string name="update_librerax">Ενημερώστε το LibreraX στην τελευταία έκδοση για εισαγωγή από το Librera.</string>
    <string name="reading_progress">Πρόοδος ανάγνωσης</string>
    <string name="add_to_home_screen">Προσθήκη στην αρχική οθόνη</string>
+   <string name="catalog_offline">Εκτός σύνδεσης · αποθηκευμένα αποτελέσματα</string>
+   <string name="catalog_offline_mode">Λειτουργία εκτός σύνδεσης</string>
+   <string name="catalog_no_cached_page">Δεν υπάρχουν αποθηκευμένα αποτελέσματα για αυτή τη σελίδα</string>
+   <string name="catalog_on_device">Στη συσκευή</string>
+   <string name="catalog_app_storage">Χώρος εφαρμογής (διαγράφεται κατά την απεγκατάσταση)</string>
+   <string name="catalog_waiting_network">Αναμονή δικτύου</string>
+   <string name="catalog_queued">Στην ουρά</string>
+   <string name="catalog_no_selection">Επιλέξτε βιβλίο για να δείτε λεπτομέρειες</string>
+   <string name="catalog_tab_title">Κατάλογος</string>
+   <string name="catalog_saved_results">Αποθηκευμένα αποτελέσματα</string>
+   <string name="catalog_filter_scope">Τα φίλτρα εφαρμόζονται στα βιβλία που έχουν φορτωθεί</string>
 </resources>

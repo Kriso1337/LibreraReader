@@ -719,4 +719,15 @@
    <string name="update_librerax">Librera에서 가져오려면 LibreraX를 최신 버전으로 업데이트하세요.</string>
    <string name="reading_progress">읽기 진행률</string>
    <string name="add_to_home_screen">홈 화면에 추가</string>
+   <string name="catalog_offline">오프라인 · 저장된 결과</string>
+   <string name="catalog_offline_mode">오프라인 모드</string>
+   <string name="catalog_no_cached_page">이 페이지에 저장된 결과가 없습니다</string>
+   <string name="catalog_on_device">기기에 저장됨</string>
+   <string name="catalog_app_storage">앱 저장소(앱 삭제 시 제거됨)</string>
+   <string name="catalog_waiting_network">네트워크 대기 중</string>
+   <string name="catalog_queued">대기 중</string>
+   <string name="catalog_no_selection">책을 선택하여 세부 정보 보기</string>
+   <string name="catalog_tab_title">카탈로그</string>
+   <string name="catalog_saved_results">저장된 결과</string>
+   <string name="catalog_filter_scope">필터는 불러온 책에 적용됩니다</string>
 </resources>

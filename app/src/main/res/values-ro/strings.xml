@@ -719,4 +719,15 @@
    <string name="update_librerax">Actualizați LibreraX la cea mai recentă versiune pentru a importa din Librera.</string>
    <string name="reading_progress">Progresul lecturii</string>
    <string name="add_to_home_screen">Adaugă pe ecranul de pornire</string>
+   <string name="catalog_offline">Offline · rezultate salvate</string>
+   <string name="catalog_offline_mode">Mod offline</string>
+   <string name="catalog_no_cached_page">Nu există rezultate salvate pentru această pagină</string>
+   <string name="catalog_on_device">Pe dispozitiv</string>
+   <string name="catalog_app_storage">Stocarea aplicației (ștearsă la dezinstalare)</string>
+   <string name="catalog_waiting_network">Se așteaptă rețeaua</string>
+   <string name="catalog_queued">În coadă</string>
+   <string name="catalog_no_selection">Alegeți o carte pentru a vedea detaliile</string>
+   <string name="catalog_tab_title">Catalog</string>
+   <string name="catalog_saved_results">Rezultate salvate</string>
+   <string name="catalog_filter_scope">Filtrele se aplică listei de cărți încărcate</string>
 </resources>

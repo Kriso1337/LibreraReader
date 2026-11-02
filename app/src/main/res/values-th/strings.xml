@@ -719,4 +719,15 @@
    <string name="update_librerax">อัปเดต LibreraX เป็นเวอร์ชันล่าสุดเพื่อนำเข้าจาก Librera</string>
    <string name="reading_progress">ความคืบหน้าการอ่าน</string>
    <string name="add_to_home_screen">เพิ่มไปยังหน้าจอหลัก</string>
+   <string name="catalog_offline">ออฟไลน์ · ผลลัพธ์ที่บันทึกไว้</string>
+   <string name="catalog_offline_mode">โหมดออฟไลน์</string>
+   <string name="catalog_no_cached_page">ไม่มีผลลัพธ์ที่บันทึกไว้สำหรับหน้านี้</string>
+   <string name="catalog_on_device">ในอุปกรณ์</string>
+   <string name="catalog_app_storage">พื้นที่จัดเก็บของแอป (ลบเมื่อถอนการติดตั้ง)</string>
+   <string name="catalog_waiting_network">กำลังรอเครือข่าย</string>
+   <string name="catalog_queued">อยู่ในคิว</string>
+   <string name="catalog_no_selection">เลือกหนังสือเพื่อดูรายละเอียด</string>
+   <string name="catalog_tab_title">แค็ตตาล็อก</string>
+   <string name="catalog_saved_results">ผลลัพธ์ที่บันทึกไว้</string>
+   <string name="catalog_filter_scope">ตัวกรองใช้กับรายการหนังสือที่โหลดแล้ว</string>
 </resources>

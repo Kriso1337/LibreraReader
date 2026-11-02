@@ -719,4 +719,15 @@
    <string name="update_librerax">Librera-യിൽ നിന്ന് ഇമ്പോർട്ട് ചെയ്യാൻ LibreraX ഏറ്റവും പുതിയ പതിപ്പിലേക്ക് അപ്ഡേറ്റ് ചെയ്യുക.</string>
    <string name="reading_progress">വായനാ പുരോഗതി</string>
    <string name="add_to_home_screen">ഹോം സ്ക്രീനിലേക്ക് ചേർക്കുക</string>
+   <string name="catalog_offline">ഓഫ്‌ലൈൻ · സംരക്ഷിച്ച ഫലങ്ങൾ</string>
+   <string name="catalog_offline_mode">ഓഫ്‌ലൈൻ മോഡ്</string>
+   <string name="catalog_no_cached_page">ഈ പേജിനായി സംരക്ഷിച്ച ഫലങ്ങളില്ല</string>
+   <string name="catalog_on_device">ഉപകരണത്തിൽ</string>
+   <string name="catalog_app_storage">ആപ്പിന്റെ സംഭരണം (ആപ്പ് നീക്കുമ്പോൾ മായും)</string>
+   <string name="catalog_waiting_network">നെറ്റ്‌വർക്കിനായി കാത്തിരിക്കുന്നു</string>
+   <string name="catalog_queued">ക്യൂവിൽ</string>
+   <string name="catalog_no_selection">വിശദാംശങ്ങൾ കാണാൻ ഒരു പുസ്തകം തിരഞ്ഞെടുക്കുക</string>
+   <string name="catalog_tab_title">കാറ്റലോഗ്</string>
+   <string name="catalog_saved_results">സംരക്ഷിച്ച ഫലങ്ങൾ</string>
+   <string name="catalog_filter_scope">ലോഡ് ചെയ്ത പുസ്തകങ്ങൾക്കാണ് ഫിൽട്ടറുകൾ ബാധകമാകുന്നത്</string>
 </resources>

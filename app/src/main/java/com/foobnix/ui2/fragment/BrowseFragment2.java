@@ -85,6 +85,7 @@ import com.foobnix.sys.TempHolder;
 import com.foobnix.ui2.AppDB;
 import com.foobnix.ui2.FileMetaCore;
 import com.foobnix.ui2.MainTabs2;
+import com.foobnix.ui2.LibraryDesign;
 import com.foobnix.ui2.adapter.DefaultListeners;
 import com.foobnix.ui2.adapter.FileMetaAdapter;
 import com.foobnix.ui2.fast.FastScrollRecyclerView;
@@ -1418,7 +1419,8 @@ import java.util.Map;
         } else {
             starIcon.setImageResource(R.drawable.glyphicons_9_heart_empty);
         }
-        TintUtil.setTintImageWithAlpha(starIcon, Color.WHITE);
+        TintUtil.setTintImageWithAlpha(starIcon, getActivity() instanceof MainTabs2 ? LibraryDesign.accent() : Color.WHITE);
+        if (getActivity() instanceof MainTabs2) LibraryDesign.paintHeader(pathContainer);
 
         starIcon.setOnClickListener(new OnClickListener() {
 

@@ -719,4 +719,15 @@
    <string name="update_librerax">Cập nhật LibreraX lên phiên bản mới nhất để nhập từ Librera.</string>
    <string name="reading_progress">Tiến độ đọc</string>
    <string name="add_to_home_screen">Thêm vào màn hình chính</string>
+   <string name="catalog_offline">Ngoại tuyến · kết quả đã lưu</string>
+   <string name="catalog_offline_mode">Chế độ ngoại tuyến</string>
+   <string name="catalog_no_cached_page">Không có kết quả đã lưu cho trang này</string>
+   <string name="catalog_on_device">Trên thiết bị</string>
+   <string name="catalog_app_storage">Bộ nhớ ứng dụng (bị xóa khi gỡ cài đặt)</string>
+   <string name="catalog_waiting_network">Đang chờ mạng</string>
+   <string name="catalog_queued">Trong hàng đợi</string>
+   <string name="catalog_no_selection">Chọn sách để xem chi tiết</string>
+   <string name="catalog_tab_title">Danh mục</string>
+   <string name="catalog_saved_results">Kết quả đã lưu</string>
+   <string name="catalog_filter_scope">Bộ lọc áp dụng cho danh sách sách đã tải</string>
 </resources>

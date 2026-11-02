@@ -487,18 +487,21 @@ public abstract class DocumentController {
      * @param underStatusBar the page runs up behind the status bar instead of stopping
      * below a strip of its own, so that a header floating at the top of the page and the
      * status bar over it read as one surface.
-     * @param barColor what the strip kept for the status bar is painted with, where one is
+     * @param requestedBarColor what the strip kept for the status bar is painted with, where one is
      * kept at all - the chrome below it is painted in the same colour.
      */
-    public static void applyEdgeToEdge(final Activity a, final boolean underStatusBar, final int barColor) {
+    public static void applyEdgeToEdge(final Activity a, final boolean underStatusBar, final int requestedBarColor) {
+        final boolean reader = isReader(a);
+        final int barColor = reader ? com.foobnix.pdf.info.view.ReaderChrome.paper() : requestedBarColor;
         if (a instanceof ComponentActivity) {
             // Both bars take the app's own colour, with the light icons they always had: the
             // strip kept for the status bar is painted by the app, and the strip the buttons
             // at the foot stand on is painted here. The system's scrim would leave that strip
             // black under chrome that is not, which reads as a band cut off the screen.
+            boolean lightReader = reader && !com.foobnix.pdf.info.view.ReaderChrome.dark();
             EdgeToEdge.enable((ComponentActivity) a,
-                              SystemBarStyle.dark(Color.TRANSPARENT),
-                              SystemBarStyle.dark(barColor));
+                              lightReader ? SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT) : SystemBarStyle.dark(Color.TRANSPARENT),
+                              lightReader ? SystemBarStyle.light(barColor, barColor) : SystemBarStyle.dark(barColor));
         }
         // From Android 10 on, the style above leaves the bar clear and lets the system put its
         // own scrim over whatever shows through. The colour is set here instead, and the scrim

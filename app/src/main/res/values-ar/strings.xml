@@ -719,4 +719,15 @@
    <string name="update_librerax">حدّث LibreraX إلى أحدث إصدار للاستيراد من Librera.</string>
    <string name="reading_progress">تقدّم القراءة</string>
    <string name="add_to_home_screen">إضافة إلى الشاشة الرئيسية</string>
+   <string name="catalog_offline">بلا اتصال · نتائج محفوظة</string>
+   <string name="catalog_offline_mode">وضع عدم الاتصال</string>
+   <string name="catalog_no_cached_page">لا توجد نتائج محفوظة لهذه الصفحة</string>
+   <string name="catalog_on_device">على الجهاز</string>
+   <string name="catalog_app_storage">مساحة التطبيق (تُحذف عند إزالته)</string>
+   <string name="catalog_waiting_network">بانتظار الشبكة</string>
+   <string name="catalog_queued">في قائمة الانتظار</string>
+   <string name="catalog_no_selection">اختر كتابًا لعرض التفاصيل</string>
+   <string name="catalog_tab_title">الفهرس</string>
+   <string name="catalog_saved_results">النتائج المحفوظة</string>
+   <string name="catalog_filter_scope">تُطبّق الفلاتر على الكتب التي تم تحميل بياناتها</string>
 </resources>

@@ -719,4 +719,15 @@
    <string name="update_librerax">Atnaujinkite LibreraX iki naujausios versijos, kad galėtumėte importuoti iš Librera.</string>
    <string name="reading_progress">Skaitymo eiga</string>
    <string name="add_to_home_screen">Pridėti prie pradžios ekrano</string>
+   <string name="catalog_offline">Neprisijungus · išsaugoti rezultatai</string>
+   <string name="catalog_offline_mode">Darbas neprisijungus</string>
+   <string name="catalog_no_cached_page">Šiam puslapiui nėra išsaugotų rezultatų</string>
+   <string name="catalog_on_device">Įrenginyje</string>
+   <string name="catalog_app_storage">Programėlės saugykla (pašalinama kartu su programėle)</string>
+   <string name="catalog_waiting_network">Laukiama tinklo</string>
+   <string name="catalog_queued">Eilėje</string>
+   <string name="catalog_no_selection">Pasirinkite knygą, kad matytumėte išsamią informaciją</string>
+   <string name="catalog_tab_title">Katalogas</string>
+   <string name="catalog_saved_results">Išsaugoti rezultatai</string>
+   <string name="catalog_filter_scope">Filtrai taikomi įkeltam knygų sąrašui</string>
 </resources>

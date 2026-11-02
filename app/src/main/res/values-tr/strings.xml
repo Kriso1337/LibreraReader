@@ -719,4 +719,15 @@
    <string name="update_librerax">Librera\'dan içe aktarmak için LibreraX\'i en son sürüme güncelleyin.</string>
    <string name="reading_progress">Okuma ilerlemesi</string>
    <string name="add_to_home_screen">Ana ekrana ekle</string>
+   <string name="catalog_offline">Çevrimdışı · kaydedilen sonuçlar</string>
+   <string name="catalog_offline_mode">Çevrimdışı mod</string>
+   <string name="catalog_no_cached_page">Bu sayfa için kaydedilmiş sonuç yok</string>
+   <string name="catalog_on_device">Cihazda</string>
+   <string name="catalog_app_storage">Uygulama depolaması (kaldırılınca silinir)</string>
+   <string name="catalog_waiting_network">Ağ bekleniyor</string>
+   <string name="catalog_queued">Sırada</string>
+   <string name="catalog_no_selection">Ayrıntıları görmek için bir kitap seçin</string>
+   <string name="catalog_tab_title">Katalog</string>
+   <string name="catalog_saved_results">Kaydedilen sonuçlar</string>
+   <string name="catalog_filter_scope">Filtreler yüklenen kitap listesine uygulanır</string>
 </resources>

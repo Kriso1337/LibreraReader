@@ -719,4 +719,15 @@
    <string name="update_librerax">Librera からインポートするには、LibreraX を最新版に更新してください。</string>
    <string name="reading_progress">読書の進捗</string>
    <string name="add_to_home_screen">ホーム画面に追加</string>
+   <string name="catalog_offline">オフライン · 保存済みの結果</string>
+   <string name="catalog_offline_mode">オフラインモード</string>
+   <string name="catalog_no_cached_page">このページの保存済みの結果はありません</string>
+   <string name="catalog_on_device">端末内</string>
+   <string name="catalog_app_storage">アプリ内ストレージ（アンインストール時に削除）</string>
+   <string name="catalog_waiting_network">ネットワークを待機中</string>
+   <string name="catalog_queued">待機中</string>
+   <string name="catalog_no_selection">本を選択して詳細を表示</string>
+   <string name="catalog_tab_title">カタログ</string>
+   <string name="catalog_saved_results">保存済みの結果</string>
+   <string name="catalog_filter_scope">フィルターは読み込み済みの書籍に適用されます</string>
 </resources>

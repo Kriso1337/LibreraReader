@@ -80,6 +80,7 @@ import com.foobnix.ui2.AdsFragmentActivity;
 import com.foobnix.ui2.AppDB;
 import com.foobnix.ui2.AppDB.SEARCH_IN;
 import com.foobnix.ui2.MainTabs2;
+import com.foobnix.ui2.LibraryDesign;
 import com.foobnix.ui2.AppDB.SORT_BY;
 import com.foobnix.ui2.BooksService;
 import com.foobnix.ui2.adapter.AuthorsAdapter2;
@@ -322,7 +323,7 @@ public class SearchFragment2 extends UIFragment<FileMeta> {
     }
 
     private void setSearchHint(CharSequence hint) {
-        searchEditText.setHint(hint == null ? null : hint.toString().toUpperCase(Locale.getDefault()));
+        searchEditText.setHint(hint == null ? null : hint.toString());
     }
 
     /**
@@ -332,26 +333,12 @@ public class SearchFragment2 extends UIFragment<FileMeta> {
      * rectangle with a border cutting it from the colour it sits on.
      */
     private void styleFilterLineOnTint() {
-        if (getId() != R.id.pager) {
-            return;
-        }
-        menu2.setBackgroundResource(R.drawable.bg_round_press);
-        TintUtil.setTintImageNoAlpha(menu2, Color.WHITE);
-
-        // The buttons stand on the bar itself. Their own panel was a second, solid block of
-        // the same tint laid over a bar the page shows through - a darker patch with an
-        // edge of its own, right where the bar was meant to read as one surface.
-        secondTopPanel.setBackgroundColor(Color.TRANSPARENT);
-
-        searchEditText.setBackgroundResource(R.drawable.bg_search_round);
-        searchEditText.setPadding(Dips.DP_15,
-                                  searchEditText.getPaddingTop(),
-                                  searchEditText.getPaddingRight(),
-                                  searchEditText.getPaddingBottom());
-        TintUtil.setUITextColor(searchEditText, Color.WHITE);
-        countBooks.setTextColor(Color.WHITE);
-        TintUtil.setTintImageNoAlpha(cleanFilter, Color.WHITE);
-        TintUtil.setTintImageNoAlpha(myAutoCompleteImage, Color.WHITE);
+        if (getId() != R.id.pager) return;
+        View header = (View) menu2.getParent();
+        LibraryDesign.paintHeader(header);
+        countBooks.setTextColor(LibraryDesign.muted());
+        TintUtil.setTintImageNoAlpha(cleanFilter, LibraryDesign.accent());
+        TintUtil.setTintImageNoAlpha(myAutoCompleteImage, LibraryDesign.accent());
     }
 
     public void onGridList() {

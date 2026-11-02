@@ -37,6 +37,7 @@ import com.foobnix.pdf.info.view.EditTextHelper;
 import com.foobnix.pdf.info.view.ScaledImageView;
 import com.foobnix.pdf.info.widget.FileInformationDialog;
 import com.foobnix.ui2.AppRecycleAdapter;
+import com.foobnix.ui2.LibraryDesign;
 
 public class EntryAdapter extends AppRecycleAdapter<Entry, RecyclerView.ViewHolder> {
 
@@ -315,6 +316,11 @@ public class EntryAdapter extends AppRecycleAdapter<Entry, RecyclerView.ViewHold
         }
 
         bindItemClickAndLongClickListeners(holder.parent, entry);
+        if (context instanceof MainTabs2) {
+            LibraryDesign.card(holder.parent, false);
+            holder.title.setTextColor(LibraryDesign.ink()); holder.content.setTextColor(LibraryDesign.muted());
+            LibraryDesign.action(holder.remove); LibraryDesign.action(holder.expand);
+        }
 
         if (AppState.get().appTheme == AppState.THEME_DARK_OLED) {
             holder.parent.setBackgroundColor(Color.BLACK);

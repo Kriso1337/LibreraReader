@@ -54,11 +54,14 @@
             android:textSize="@dimen/text_subtitle" />
     </LinearLayout>
 
-    <FrameLayout
+    <HorizontalScrollView
+        android:id="@+id/readerSpeechTools"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:scrollbars="none">
 
         <include layout="@layout/tts_line" />
-    </FrameLayout>
+    </HorizontalScrollView>
 
 </LinearLayout>

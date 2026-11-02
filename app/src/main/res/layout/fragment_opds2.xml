@@ -5,7 +5,7 @@
     android:focusableInTouchMode="true"
     android:orientation="vertical">
 
-    <LinearLayout
+    <com.foobnix.ui2.LibraryHeader
         android:id="@+id/pathContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
             android:padding="6dip"
             android:contentDescription="@string/cd_add_new_opds_catalog"
             android:src="@drawable/glyphicons_371_plus" />
-    </LinearLayout>
+    </com.foobnix.ui2.LibraryHeader>
 
     <FrameLayout
         android:layout_width="match_parent"

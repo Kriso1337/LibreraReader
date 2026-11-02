@@ -24,7 +24,7 @@
             android:layout_weight="0"
             android:background="#dd4E342E"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:padding="2dip" >
 
             <ImageView
@@ -38,6 +38,11 @@
                 android:src="@mipmap/icon_pdf_droid"
                 android:visibility="gone" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
             <!-- The trail back to the dialog this one was opened from. It is set in the same
                  caps and weight as the name it leads to, so the head reads as one line. -->
             <TextView
@@ -59,12 +64,19 @@
                 android:textColor="@color/white"
                 android:textStyle="bold" />
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
             <!-- The name of the dialog, set in caps and bold so the head is told apart from
                  the settings under it. -->
             <TextView
                 android:id="@+id/dialogTitle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dip"
@@ -82,7 +94,7 @@
                 android:layout_height="@dimen/wh_button"
                 android:layout_weight="0"
                 android:src="@drawable/my_glyphicons_114_paragraph_justify" />
-            
+
             <ImageView
                 android:id="@+id/closePopup"
                 style="@style/buttonWhiteClose"
@@ -91,6 +103,7 @@
                 android:layout_height="@dimen/wh_button"
                 android:layout_weight="0"
                 android:src="@drawable/glyphicons_599_menu_close" />
+            </LinearLayout>
         </LinearLayout>
 
         <com.foobnix.pdf.info.view.MyFrameLayout

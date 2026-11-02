@@ -719,4 +719,15 @@
    <string name="update_librerax">Nuashonraigh LibreraX go dtí an leagan is déanaí chun iompórtáil ó Librera.</string>
    <string name="reading_progress">Dul chun cinn léitheoireachta</string>
    <string name="add_to_home_screen">Cuir leis an scáileán baile</string>
+   <string name="catalog_offline">As líne · torthaí sábháilte</string>
+   <string name="catalog_offline_mode">Mód as líne</string>
+   <string name="catalog_no_cached_page">Níl torthaí sábháilte don leathanach seo</string>
+   <string name="catalog_on_device">Ar an ngléas</string>
+   <string name="catalog_app_storage">Stóras na haipe (scriostar é nuair a dhíshuiteáiltear í)</string>
+   <string name="catalog_waiting_network">Ag fanacht leis an líonra</string>
+   <string name="catalog_queued">Sa scuaine</string>
+   <string name="catalog_no_selection">Roghnaigh leabhar chun sonraí a fheiceáil</string>
+   <string name="catalog_tab_title">Catalóg</string>
+   <string name="catalog_saved_results">Torthaí sábháilte</string>
+   <string name="catalog_filter_scope">Baineann na scagairí leis na leabhair atá luchtaithe</string>
 </resources>

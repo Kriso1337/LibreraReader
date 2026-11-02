@@ -719,4 +719,15 @@
    <string name="update_librerax">Oppdater LibreraX til nyeste versjon for å importere fra Librera.</string>
    <string name="reading_progress">Lesefremdrift</string>
    <string name="add_to_home_screen">Legg til på startskjermen</string>
+   <string name="catalog_offline">Frakoblet · lagrede resultater</string>
+   <string name="catalog_offline_mode">Frakoblet modus</string>
+   <string name="catalog_no_cached_page">Ingen lagrede resultater for denne siden</string>
+   <string name="catalog_on_device">På enheten</string>
+   <string name="catalog_app_storage">Applagring (slettes ved avinstallering)</string>
+   <string name="catalog_waiting_network">Venter på nettverk</string>
+   <string name="catalog_queued">I kø</string>
+   <string name="catalog_no_selection">Velg en bok for å se detaljer</string>
+   <string name="catalog_tab_title">Katalog</string>
+   <string name="catalog_saved_results">Lagrede resultater</string>
+   <string name="catalog_filter_scope">Filtrene gjelder innlastede bøker</string>
 </resources>

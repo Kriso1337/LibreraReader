@@ -719,4 +719,15 @@
    <string name="update_librerax">יש לעדכן את LibreraX לגרסה האחרונה כדי לייבא מ-Librera.</string>
    <string name="reading_progress">התקדמות קריאה</string>
    <string name="add_to_home_screen">הוספה למסך הבית</string>
+   <string name="catalog_offline">ללא חיבור · תוצאות שמורות</string>
+   <string name="catalog_offline_mode">מצב לא מקוון</string>
+   <string name="catalog_no_cached_page">אין תוצאות שמורות לדף הזה</string>
+   <string name="catalog_on_device">במכשיר</string>
+   <string name="catalog_app_storage">אחסון היישום (נמחק בעת הסרתו)</string>
+   <string name="catalog_waiting_network">ממתין לרשת</string>
+   <string name="catalog_queued">בתור</string>
+   <string name="catalog_no_selection">בחרו ספר כדי לראות פרטים</string>
+   <string name="catalog_tab_title">קטלוג</string>
+   <string name="catalog_saved_results">תוצאות שמורות</string>
+   <string name="catalog_filter_scope">המסננים חלים על הספרים שנטענו</string>
 </resources>

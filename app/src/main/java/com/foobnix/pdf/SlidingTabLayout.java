@@ -36,6 +36,7 @@ import com.foobnix.pdf.info.R;
 import com.foobnix.pdf.info.TintUtil;
 import com.foobnix.sys.DoubleClickListener;
 import com.foobnix.ui2.MainTabs2;
+import com.foobnix.ui2.LibraryDesign;
 import com.foobnix.ui2.adapter.TabsAdapter2;
 import androidx.core.content.ContextCompat;
 
@@ -102,6 +103,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
     private int mTabViewTextViewId;
 
     private ViewPager mViewPager;
+    private boolean pendingSelectionScroll = true;
     private ViewPager.OnPageChangeListener mViewPagerPageChangeListener;
 
     public SlidingTabLayout(Context context) {
@@ -169,7 +171,8 @@ public class SlidingTabLayout extends HorizontalScrollView {
         }
         boolean ink = AppState.get().appTheme == AppState.THEME_INK;
         floatingPill = new GradientDrawable();
-        floatingPill.setColor(ink ? pageColor() : setColorAlpha(color, AppsConfig.APP_TRANSPARENCY));
+        floatingPill.setColor(LibraryDesign.surface());
+        floatingPill.setStroke(Dips.DP_1, LibraryDesign.line());
         if (ink) {
             floatingPill.setStroke(Dips.DP_1, TintUtil.color);
         }
@@ -186,7 +189,20 @@ public class SlidingTabLayout extends HorizontalScrollView {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        pendingSelectionScroll = true;
         applyFloatingRadius(h);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (pendingSelectionScroll && mViewPager != null && getWidth() > 0) {
+            // Selection can arrive before the tabs have a position. Reveal it after
+            // measurement, and again after rotation, without fighting manual scrolling.
+            pendingSelectionScroll = false;
+            updateIcons(mViewPager.getCurrentItem());
+            scrollToTab(mViewPager.getCurrentItem(), 0);
+        }
     }
 
     /**
@@ -308,7 +324,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
             }
             Drawable patch = ((RippleDrawable) tab.getBackground()).getDrawable(0);
             boolean ink = AppState.get().appTheme == AppState.THEME_INK;
-            int color = setColorAlpha(ink ? TintUtil.color : Color.WHITE, PATCH_ALPHA);
+            int color = LibraryDesign.accent();
             ((GradientDrawable) patch).setColor(isSelected ? color : Color.TRANSPARENT);
         } catch (Exception e) {
             LOG.e(e);
@@ -428,6 +444,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
         getmTabStrip().removeAllViews();
 
         mViewPager = viewPager;
+        pendingSelectionScroll = true;
         if (viewPager != null) {
             viewPager.addOnPageChangeListener(new InternalViewPagerListener());
             populateTabStrip();
@@ -475,8 +492,10 @@ public class SlidingTabLayout extends HorizontalScrollView {
             }
         }
 
+        textView.setMinimumHeight(Dips.dpToPx(48));
+        textView.setMinimumWidth(Dips.dpToPx(isIconsAlone() ? 56 : 88));
         if (myPOS == POS_HORIZONTAL) {
-            textView.setAllCaps(true);
+            textView.setAllCaps(false);
         } else {
             textView.setSingleLine();
             textView.setEllipsize(TextUtils.TruncateAt.END);
@@ -604,20 +623,21 @@ public class SlidingTabLayout extends HorizontalScrollView {
                 if (isFloating()) {
                     // Every tab the same width, so the patch behind the chosen one comes out
                     // as a pill across it rather than a circle in the middle of it.
-                    params.width = 0;
+                    params.width = LayoutParams.WRAP_CONTENT;
                     params.leftMargin = params.rightMargin = Dips.DP_2;
                 }
                 getmTabStrip().addView(tabView, params);
 
             }
         }
-        updateIcons(0);
+        updateIcons(mViewPager.getCurrentItem());
 
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        pendingSelectionScroll = true;
 
         if (mViewPager != null) {
             scrollToTab(mViewPager.getCurrentItem(), 0);
@@ -633,6 +653,10 @@ public class SlidingTabLayout extends HorizontalScrollView {
         TextView selectedChild = (TextView) getmTabStrip().getChildAt(tabIndex);
 
         if (selectedChild != null) {
+            if (getWidth() <= 0 || selectedChild.getWidth() <= 0) {
+                pendingSelectionScroll = true;
+                return;
+            }
             int targetScrollX = selectedChild.getLeft() + positionOffset;
 
             if (tabIndex > 0 || positionOffset > 0) {
@@ -654,7 +678,8 @@ public class SlidingTabLayout extends HorizontalScrollView {
     public void updateIcons(int position) {
         for (int i = 0; i < getmTabStrip().getChildCount(); i++) {
             TextView childAt = (TextView) getmTabStrip().getChildAt(i);
-            int myColor = i == position ? Color.WHITE : TintUtil.colorSecondTab;
+            int myColor = i == position && isFloating() && showTabPatch ? LibraryDesign.onAccent() : i == position ? LibraryDesign.accent() : LibraryDesign.muted();
+            childAt.setTypeface(Typeface.DEFAULT, i == position ? Typeface.BOLD : Typeface.NORMAL);
 
 
             Drawable drawable;
@@ -665,8 +690,8 @@ public class SlidingTabLayout extends HorizontalScrollView {
             }
 
             if (isInkOnPage()) {
-                TintUtil.setDrawableTint(drawable, TintUtil.color);
-                childAt.setTextColor(TintUtil.color);
+                TintUtil.setDrawableTint(drawable, LibraryDesign.ink());
+                childAt.setTextColor(LibraryDesign.ink());
             } else {
                 childAt.setTextColor(myColor);
                 TintUtil.setDrawableTint(drawable, myColor);

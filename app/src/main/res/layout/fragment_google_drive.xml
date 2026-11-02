@@ -5,10 +5,10 @@
     android:orientation="vertical">
 
 
-    <LinearLayout
+    <com.foobnix.ui2.LibraryHeader
         android:id="@+id/topPanel"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/wh_button"
+        android:layout_height="wrap_content"
         android:layout_margin="@dimen/panel_padding"
         android:background="@drawable/bg_search_second"
         android:gravity="center_vertical"
@@ -42,7 +42,7 @@
             android:text="@string/sign_in" />
 
 
-    </LinearLayout>
+    </com.foobnix.ui2.LibraryHeader>
 
     <TextView
         android:id="@+id/syncInfo"

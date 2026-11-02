@@ -78,69 +78,54 @@
                 android:id="@+id/infoLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:gravity="bottom"
-                android:weightSum="2"
-                android:orientation="horizontal" >
-
-                <TextView
-                    android:id="@+id/browserExt"
-                    android:layout_width="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="8dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="2dip"
-                    android:layout_marginLeft="1dip"
-                    android:layout_marginRight="2dip"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    android:text="PDF"
-                    android:textAllCaps="true"
-                    android:textSize="@dimen/text_subtitle"
-                    android:textStyle="normal" />
-
-                <TextView
-                    android:id="@+id/idPercentText"
-                    android:layout_width="wrap_content"
+                    android:gravity="center_vertical">
+                    <TextView
+                        android:id="@+id/browserExt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:singleLine="true"
+                        android:text="EPUB"
+                        android:textSize="@dimen/text_subtitle" />
+                    <TextView
+                        android:id="@+id/idPercentText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:singleLine="true"
+                        android:text="24%"
+                        android:textSize="@dimen/text_subtitle" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="2dip"
-                    android:layout_marginLeft="2dip"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:text="20%"
-                    android:textSize="@dimen/text_subtitle"
-                    android:textStyle="italic" />
-
-                <ImageView
-                    android:id="@+id/cloudImage"
-                    android:layout_width="@dimen/wh_button_small"
-                    android:layout_height="@dimen/wh_button_small"
-                    android:padding="3dip"
-                    android:layout_weight="0"
-                    android:src="@drawable/dropbox" />
-
-                <ImageView
-                    android:id="@+id/starIcon"
-                    style="@style/buttonWhite"
-                    android:layout_width="@dimen/wh_button_small"
-                    android:layout_height="@dimen/wh_button_small"
-                    android:layout_weight="0"
-                    android:background="@drawable/bg_round_press"
-                    android:padding="2dip"
-                    android:contentDescription="@string/add_to_favorites"
-                    android:src="@drawable/glyphicons_9_heart_empty"
-                    android:tint="@color/tint_gray" />
-
-
-                <ImageView
-                    android:id="@+id/itemMenu"
-                    android:layout_width="@dimen/wh_button_small"
-                    android:layout_height="@dimen/wh_button_small"
-                    android:layout_weight="0"
-                    android:background="@drawable/bg_round_press"
-                    android:padding="2dip"
-                    android:contentDescription="@string/book_menu"
-                    android:src="@drawable/glyphicons_498_more_vertical"
-                    android:tint="@color/tint_gray" />
+                    android:layout_marginTop="8dp"
+                    android:gravity="end|center_vertical">
+                    <ImageView
+                        android:id="@+id/cloudImage"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/dropbox" />
+                    <ImageView
+                        android:id="@+id/starIcon"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="@string/add_to_favorites"
+                        android:src="@drawable/glyphicons_9_heart_empty" />
+                    <ImageView
+                        android:id="@+id/itemMenu"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:contentDescription="@string/book_menu"
+                        android:src="@drawable/glyphicons_498_more_vertical" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

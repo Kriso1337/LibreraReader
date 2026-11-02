@@ -719,4 +719,15 @@
    <string name="update_librerax">Librera से आयात करने के लिए LibreraX को नवीनतम संस्करण में अपडेट करें।</string>
    <string name="reading_progress">पढ़ने की प्रगति</string>
    <string name="add_to_home_screen">होम स्क्रीन पर जोड़ें</string>
+   <string name="catalog_offline">ऑफ़लाइन · सहेजे गए परिणाम</string>
+   <string name="catalog_offline_mode">ऑफ़लाइन मोड</string>
+   <string name="catalog_no_cached_page">इस पृष्ठ के लिए कोई सहेजे गए परिणाम नहीं हैं</string>
+   <string name="catalog_on_device">डिवाइस पर</string>
+   <string name="catalog_app_storage">ऐप का संग्रहण (ऐप हटाने पर मिट जाता है)</string>
+   <string name="catalog_waiting_network">नेटवर्क की प्रतीक्षा में</string>
+   <string name="catalog_queued">कतार में</string>
+   <string name="catalog_no_selection">विवरण देखने के लिए किताब चुनें</string>
+   <string name="catalog_tab_title">कैटलॉग</string>
+   <string name="catalog_saved_results">सहेजे गए परिणाम</string>
+   <string name="catalog_filter_scope">फ़िल्टर लोड की गई किताबों पर लागू होते हैं</string>
 </resources>

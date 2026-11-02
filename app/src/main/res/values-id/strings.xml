@@ -719,4 +719,15 @@
    <string name="update_librerax">Perbarui LibreraX ke versi terbaru untuk mengimpor dari Librera.</string>
    <string name="reading_progress">Kemajuan membaca</string>
    <string name="add_to_home_screen">Tambahkan ke layar utama</string>
+   <string name="catalog_offline">Offline · hasil tersimpan</string>
+   <string name="catalog_offline_mode">Mode offline</string>
+   <string name="catalog_no_cached_page">Tidak ada hasil tersimpan untuk halaman ini</string>
+   <string name="catalog_on_device">Di perangkat</string>
+   <string name="catalog_app_storage">Penyimpanan aplikasi (dihapus saat aplikasi dicopot)</string>
+   <string name="catalog_waiting_network">Menunggu jaringan</string>
+   <string name="catalog_queued">Dalam antrean</string>
+   <string name="catalog_no_selection">Pilih buku untuk melihat detail</string>
+   <string name="catalog_tab_title">Katalog</string>
+   <string name="catalog_saved_results">Hasil tersimpan</string>
+   <string name="catalog_filter_scope">Filter berlaku untuk buku yang sudah dimuat</string>
 </resources>

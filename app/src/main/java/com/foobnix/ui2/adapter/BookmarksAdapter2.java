@@ -27,6 +27,7 @@ import com.foobnix.pdf.info.TintUtil;
 import com.foobnix.ui2.MainTabs2;
 import com.foobnix.ui2.AppDB;
 import com.foobnix.ui2.AppRecycleAdapter;
+import com.foobnix.ui2.LibraryDesign;
 import com.foobnix.ui2.adapter.BookmarksAdapter2.BookmarksViewHolder;
 
 public class BookmarksAdapter2 extends AppRecycleAdapter<AppBookmark, BookmarksViewHolder> {
@@ -112,6 +113,11 @@ public class BookmarksAdapter2 extends AppRecycleAdapter<AppBookmark, BookmarksV
         FileMetaAdapter.showShadow(holder.parent, AppState.get().isBorderAndShadow);
 
         bindItemClickAndLongClickListeners(holder.parent, getItem(position));
+        if (holder.parent.getContext() instanceof MainTabs2) {
+            LibraryDesign.card(holder.parent, false); LibraryDesign.action(holder.remove);
+            holder.title.setTextColor(LibraryDesign.ink());
+            if (!(item instanceof BookmarksAdapter.Mark)) holder.text.setTextColor(LibraryDesign.muted());
+        }
 
         if (AppState.get().appTheme == AppState.THEME_DARK_OLED) {
             holder.parent.setBackgroundColor(Color.BLACK);

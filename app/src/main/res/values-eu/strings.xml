@@ -719,4 +719,15 @@
    <string name="update_librerax">Eguneratu LibreraX azken bertsiora Librera-tik inportatzeko.</string>
    <string name="reading_progress">Irakurketaren aurrerapena</string>
    <string name="add_to_home_screen">Gehitu hasierako pantailara</string>
+   <string name="catalog_offline">Konexiorik gabe · gordetako emaitzak</string>
+   <string name="catalog_offline_mode">Konexiorik gabeko modua</string>
+   <string name="catalog_no_cached_page">Ez dago gordetako emaitzarik orri honetarako</string>
+   <string name="catalog_on_device">Gailuan</string>
+   <string name="catalog_app_storage">Aplikazioaren biltegiratzea (desinstalatzean ezabatzen da)</string>
+   <string name="catalog_waiting_network">Sarearen zain</string>
+   <string name="catalog_queued">Ilaran</string>
+   <string name="catalog_no_selection">Aukeratu liburu bat xehetasunak ikusteko</string>
+   <string name="catalog_tab_title">Katalogoa</string>
+   <string name="catalog_saved_results">Gordetako emaitzak</string>
+   <string name="catalog_filter_scope">Iragazkiak kargatutako liburuei aplikatzen zaizkie</string>
 </resources>
